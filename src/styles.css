@@ -42,6 +42,8 @@ button { color: inherit; }
 .sky-screen::after { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, rgba(2,4,13,.24), transparent 24%, transparent 72%, rgba(2,4,13,.32)); }
 .sky-screen canvas { position: relative; z-index: 1; display: block; width: 100%; height: 100%; background: transparent; cursor: crosshair; touch-action: none; }
 .sky-screen canvas:active { cursor: grabbing; }
+.sky-atlas-note { position: absolute; z-index: 3; left: 50%; bottom: 40px; translate: -50% 0; pointer-events: none; color: rgba(161, 194, 233, .65); font-size: 10px; letter-spacing: .08em; white-space: nowrap; }
+@media (max-width: 700px) { .sky-atlas-note { bottom: 78px; font-size: 8px; } }
 .sky-brand { left: 30px; top: 23px; }.sky-brand small { color: #53617e; font-size: 7px; font-weight: 500; letter-spacing: .18em; margin-left: 7px; }
 .sky-toolbar { position: absolute; z-index: 4; top: 16px; left: 50%; translate: -50%; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 10px; white-space: nowrap; }
 .sky-toolbar button { border: 1px solid transparent; background: transparent; color: #8290aa; border-radius: 6px; padding: 8px 10px; font-size: 10px; cursor: pointer; transition: .2s; }.sky-toolbar button:hover, .sky-toolbar button.active { color: #d5efff; background: rgba(120,200,255,.1); border-color: rgba(120,200,255,.12); }.sky-toolbar i { width: 1px; height: 17px; margin: 0 3px; background: rgba(255,255,255,.1); }
