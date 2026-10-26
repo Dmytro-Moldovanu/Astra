@@ -1,0 +1,31 @@
+name: Import public-domain constellation engravings
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/build_constellation_art.py"
+      - ".github/workflows/constellation-art.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-art:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --disable-pip-version-check Pillow
+      - run: python scripts/build_constellation_art.py
+      - name: Commit imported files
+        run: |
+          git add public/constellation-art/*.webp
+          if ! git diff --cached --quiet; then
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Import public-domain constellation atlas plates"
+            git push
+          fi
