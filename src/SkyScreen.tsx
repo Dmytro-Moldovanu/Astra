@@ -6,6 +6,7 @@ import type { Constellation, Location, Selection, Star } from './types'
 type CatalogData = { stars: Star[]; constellations: Constellation[] }
 type ScreenPoint = { x: number; y: number; star: Star }
 type ScreenLine = { x1: number; y1: number; x2: number; y2: number; constellation: Constellation }
+type SkyFocus = { x: number; y: number } // Positions relative to the unrotated sky radius
 
 const STAR_ALIASES: Record<string, string> = { Betelgeuse: 'Beteigeuze', Polaris: 'Polarstern' }
 
@@ -45,6 +46,8 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const hitRef = useRef<{ stars: ScreenPoint[]; lines: ScreenLine[] }>({ stars: [], lines: [] })
   const dragRef = useRef<{ x: number; rotation: number } | null>(null)
+  const currentFocusRef = useRef<SkyFocus>({ x: 0, y: 0 })
+  const [focus, setFocus] = useState<SkyFocus | null>(null)
   const [catalog, setCatalog] = useState<CatalogData | null>(null)
   const [rotation, setRotation] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -84,20 +87,46 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       // The chart disc stays opaque, keeping decorative nebulae outside the real sky map.
       ctx.clearRect(0, 0, width, height)
+      const cx = width / 2, cy = height / 2
       const radius = Math.min(width, height) * .54
-      const chartRadius = radius * zoom
-      const chartBackdrop = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, chartRadius)
+      // The round viewport remains still; only the sky chart pans and zooms inside it.
+      const chartBackdrop = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
       chartBackdrop.addColorStop(0, '#0a152d')
       chartBackdrop.addColorStop(1, '#050c1e')
       ctx.fillStyle = chartBackdrop
       ctx.beginPath()
-      ctx.arc(width / 2, height / 2, chartRadius, 0, Math.PI * 2)
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
       ctx.fill()
+
+      const angle = rotation * Math.PI / 180
+      const targetFocus = focus
+        ? { x: focus.x * Math.cos(angle) - focus.y * Math.sin(angle),
+            y: focus.x * Math.sin(angle) + focus.y * Math.cos(angle) }
+        : { x: 0, y: 0 }
+      const currentFocus = currentFocusRef.current
+      const distance = Math.hypot(targetFocus.x - currentFocus.x, targetFocus.y - currentFocus.y)
+      const moving = distance > .0006
+      if (moving) {
+        currentFocus.x += (targetFocus.x - currentFocus.x) * .22
+        currentFocus.y += (targetFocus.y - currentFocus.y) * .22
+      } else {
+        currentFocus.x = targetFocus.x
+        currentFocus.y = targetFocus.y
+      }
       const project = (azimuth: number, altitude: number) => {
         const r = ((90 - altitude) / 90) * radius * zoom
         const a = (azimuth + rotation) * Math.PI / 180
-        return { x: width / 2 + Math.sin(a) * r, y: height / 2 - Math.cos(a) * r }
+        return {
+          x: cx + Math.sin(a) * r - currentFocus.x * radius * zoom,
+          y: cy - Math.cos(a) * r - currentFocus.y * radius * zoom,
+        }
       }
+      const onChart = (x: number, y: number) => Math.hypot(x - cx, y - cy) <= radius
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2)
+      ctx.clip()
       const lines: ScreenLine[] = []
       if (showLines) {
         horizontal.linePoints.forEach(({ constellation, lines: sourceLines }) => sourceLines.forEach((line) => {
@@ -118,7 +147,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       horizontal.starPoints.forEach(({ star, pos }) => {
         if (pos.altitude < 0) return
         const p = project(pos.azimuth, pos.altitude)
-        if (p.x < -10 || p.y < -10 || p.x > width + 10 || p.y > height + 10) return
+        if (!onChart(p.x, p.y)) return
         const notable = star.name && highlightedStarNames.has(star.name)
         const size = Math.max(.45, Math.min(4.6, (6.4 - star.mag) * .48)) * (notable ? 1.24 : 1)
         if (notable) {
@@ -144,26 +173,58 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
           ctx.fillText(constellation.name, p.x, p.y); ctx.textAlign = 'left'
         }
       })
-      ctx.strokeStyle = 'rgba(120,200,255,.28)'; ctx.lineWidth = 1
-      ctx.beginPath(); ctx.arc(width / 2, height / 2, radius * zoom, 0, Math.PI * 2); ctx.stroke()
       ctx.fillStyle = 'rgba(210,230,255,.55)'; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'
       ;[['N', 0], ['O', 90], ['S', 180], ['W', 270]].forEach(([label, az]) => {
-        const p = project(Number(az), 0); ctx.fillText(String(label), p.x, p.y + 4)
+        const p = project(Number(az), 0)
+        if (Math.hypot(p.x - cx, p.y - cy) <= radius + 4) ctx.fillText(String(label), p.x, p.y + 4)
       })
       ctx.textAlign = 'left'
+      ctx.restore()
+      ctx.strokeStyle = 'rgba(120,200,255,.28)'; ctx.lineWidth = 1
+      ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.stroke()
       hitRef.current = { stars, lines }
+      if (moving) frame = requestAnimationFrame(draw)
     }
     frame = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(frame)
-  }, [horizontal, rotation, zoom, showLines, showNames, hovered, selected])
+  }, [horizontal, rotation, zoom, focus, showLines, showNames, hovered, selected])
 
   const hitTest = (x: number, y: number): Selection => {
+    const canvas = canvasRef.current
+    if (canvas) {
+      const { width, height } = canvas.getBoundingClientRect()
+      if (Math.hypot(x - width / 2, y - height / 2) > Math.min(width, height) * .54) return null
+    }
     let nearestStar: ScreenPoint | undefined, starDistance = 12
     hitRef.current.stars.forEach((point) => { const d = Math.hypot(x - point.x, y - point.y); if (d < starDistance) { nearestStar = point; starDistance = d } })
     if (nearestStar && nearestStar.star.name && highlightedStarNames.has(nearestStar.star.name)) return { kind: 'star', star: nearestStar.star }
     let nearestLine: ScreenLine | undefined, lineDistance = 8
     hitRef.current.lines.forEach((line) => { const d = distanceToSegment(x, y, line); if (d < lineDistance) { nearestLine = line; lineDistance = d } })
     return nearestLine ? { kind: 'constellation', constellation: nearestLine.constellation } : null
+  }
+
+  const focusOnConstellation = (constellation: Constellation) => {
+    const entry = horizontal?.linePoints.find(({ constellation: item }) => item.id === constellation.id)
+    if (!entry) return
+    const visiblePoints: SkyFocus[] = []
+    entry.lines.forEach((line) => line.forEach((pos) => {
+      if (pos.altitude < 0) return
+      const r = (90 - pos.altitude) / 90
+      const a = pos.azimuth * Math.PI / 180
+      visiblePoints.push({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
+    }))
+    if (!visiblePoints.length) return
+    // Visible segments, not the catalog center: some constellations cross the horizon.
+    const xs = visiblePoints.map((p) => p.x), ys = visiblePoints.map((p) => p.y)
+    setFocus({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 })
+    setZoom((z) => Math.max(z, 1.25))
+  }
+
+  const focusOnStar = (star: Star) => {
+    const pos = horizontal?.starPoints.find(({ star: item }) => item.id === star.id)?.pos
+    if (!pos || pos.altitude < 0) return
+    const r = (90 - pos.altitude) / 90, a = pos.azimuth * Math.PI / 180
+    setFocus({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
   }
 
   const pointer = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -178,9 +239,18 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         if (dragRef.current) setRotation(dragRef.current.rotation + (e.clientX - dragRef.current.x) * .25)
         else { const p = pointer(e); setHovered(hitTest(p.x, p.y)) }
       }}
-      onPointerUp={(e) => { const wasDrag = dragRef.current && Math.abs(e.clientX - dragRef.current.x) > 4; dragRef.current = null; if (!wasDrag) { const p = pointer(e); const hit = hitTest(p.x, p.y); setSelected(hit); if (hit?.kind === 'constellation') { const h = toHorizontal(hit.constellation.center[0], hit.constellation.center[1], date, location.lat, location.lng); setRotation(-h.azimuth) } } }}
+      onPointerUp={(e) => {
+        const wasDrag = dragRef.current && Math.abs(e.clientX - dragRef.current.x) > 4
+        dragRef.current = null
+        if (wasDrag) return
+        const p = pointer(e)
+        const hit = hitTest(p.x, p.y)
+        setSelected(hit)
+        if (hit?.kind === 'constellation') focusOnConstellation(hit.constellation)
+        else if (hit?.kind === 'star') focusOnStar(hit.star)
+      }}
       onPointerLeave={() => { dragRef.current = null; setHovered(null) }}
-      onWheel={(e) => { e.preventDefault(); setZoom((z) => Math.max(.72, Math.min(1.6, z - e.deltaY * .0008))) }}
+      onWheel={(e) => { e.preventDefault(); setZoom((z) => Math.max(.72, Math.min(3.2, z - e.deltaY * .0008))) }}
       aria-label="Interaktiver Sternenhimmel" />
 
     <div className="sky-brand"><span>✦</span> ASTRA <small>STERNENATLAS</small></div>
@@ -192,13 +262,13 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       <i />
       <button onClick={() => onDate(new Date(date.getTime() - 3600000))}>−1h</button>
       <button onClick={() => onDate(new Date(date.getTime() + 3600000))}>+1h</button>
-      <button onClick={() => { setRotation(0); setZoom(1); setSelected(null) }}>↻ <span>Ansicht zurücksetzen</span></button>
+      <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null) }}>↻ <span>Ansicht zurücksetzen</span></button>
     </div>
 
     <div className="observation glass"><span className="live-dot" /><div><strong>{location.name}</strong><small>{formatLocal(date, location.timeZone)}</small></div></div>
     {daytime && <div className="day-warning">☀ Tageszeit gewählt: Lehransicht ohne Sonnenlichtsimulation</div>}
     {!catalog && <div className="loading">Sternkatalog wird geladen …</div>}
-    <div className="sky-hint">Ziehen zum Drehen · Scrollen zum Zoomen · Sterne und Sternbilder anklicken</div>
+    <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: auf Auswahl zoomen · Ziehen: drehen</div>
 
     {selected && <aside className="info-card glass">
       <button className="close" onClick={() => setSelected(null)}>×</button>
