@@ -100,3 +100,11 @@ button { color: inherit; }
 .mythic-detail-art .mythic-engraving.large { width: 152px; height: 152px; flex: 0 0 152px; }
 .mythic-panel-footnote a { color: #a4c7f3; text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 700px) { .mythic-detail-art .mythic-engraving.large { width: 108px; height: 108px; flex-basis: 108px; } }
+
+/* Scrollable astronomy and mythology detail card */
+.info-card { width: min(380px, calc(100vw - 24px)); max-height: calc(100dvh - 110px); overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #344968 transparent; scrollbar-width: thin; }
+.info-card .close { position: sticky; float: right; top: 0; z-index: 2; margin: -8px -8px 0 0; }
+.mythic-story { margin: 18px 0 4px; padding: 15px 16px; border-left: 2px solid rgba(165,132,228,.65); border-radius: 0 9px 9px 0; background: rgba(108,91,159,.08); }
+.mythic-story h3 { margin: 0 0 9px; font-size: 11px; font-weight: 600; color: #b7a0f0; letter-spacing: .13em; text-transform: uppercase; }
+.mythic-story p { margin: 0; color: #a6b5d0; font-size: 13px; line-height: 1.7; }
+@media (max-width: 700px) { .info-card { max-height: calc(100dvh - 180px); } .mythic-story { padding: 12px; } }
