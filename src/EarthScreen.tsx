@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Globe from 'react-globe.gl'
 import tzLookup from 'tz-lookup'
 import { cities } from './data'
+import { localInputToDate } from './astronomy'
+import { useEarthLighting } from './earthLighting'
 import type { Location } from './types'
 
 type Props = {
@@ -19,6 +21,8 @@ export default function EarthScreen(props: Props) {
   const screenRef = useRef<HTMLElement | null>(null)
   const parallaxFrame = useRef<number | null>(null)
   const [selected, setSelected] = useState(true)
+  const observedAt = useMemo(() => localInputToDate(props.date, props.time, props.location.timeZone), [props.date, props.time, props.location.timeZone])
+  const earthTexture = useEarthLighting(observedAt)
   // The globe renderer occupies the entire viewport, not a fixed square.
   const [viewport, setViewport] = useState(() => ({ width: window.innerWidth, height: window.innerHeight }))
 
@@ -114,7 +118,7 @@ export default function EarthScreen(props: Props) {
         ref={globeRef}
         width={viewport.width} height={viewport.height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="./earth-day.jpg"
+        globeImageUrl={earthTexture}
         bumpImageUrl="./earth-bump.png"
         showAtmosphere atmosphereColor="#78c8ff" atmosphereAltitude={.11}
         pointsData={marker}
