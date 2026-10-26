@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatLocal, toHorizontal } from './astronomy'
 import { highlightedStarNames } from './data'
+import { constellationDescriptions } from './constellationDescriptions'
 import type { Constellation, Location, Selection, Star } from './types'
 
 type CatalogData = { stars: Star[]; constellations: Constellation[] }
@@ -364,7 +365,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       </> : <>
         <h2>{selected.constellation.name}</h2>
         <p className="latin">{selected.constellation.latin}</p>
-        <p>Dieses Sternbild gehört zu den 88 offiziell festgelegten Sternbildern.</p>
+        <p>{constellationDescriptions[selected.constellation.id] ?? 'Ein Sternbild mit eigener Geschichte am Nachthimmel.'}</p>
         <dl><div><dt>Kürzel</dt><dd>{selected.constellation.id}</dd></div><div><dt>Sichtbare Linien</dt><dd>{selected.constellation.lines.length}</dd></div></dl>
       </>}
     </aside>}
