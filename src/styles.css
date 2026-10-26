@@ -10,9 +10,9 @@ button { color: inherit; }
 .earth-screen { --bg-x: 0px; --bg-y: 0px; position: relative; width: 100%; height: 100%; overflow: hidden; background: #02040c; }
 .earth-screen::before, .earth-screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
 .earth-screen::before { z-index: 1; opacity: .35; background-image: radial-gradient(circle, rgba(255,255,255,.95) 0 1px, transparent 1.3px), radial-gradient(circle, rgba(120,200,255,.9) 0 .7px, transparent 1px); background-size: 129px 137px, 193px 181px; background-position: 22px 11px, 75px 46px; }
-.earth-screen::after { z-index: 2; background: radial-gradient(circle at 50% 56%, rgba(15,33,71,.18), rgba(3,5,12,.52) 56%, rgba(2,4,10,.88) 100%), linear-gradient(90deg, rgba(4,6,16,.52), rgba(4,6,16,.14) 25%, rgba(4,6,16,.14) 75%, rgba(4,6,16,.6)); }
+.earth-screen::after { z-index: 2; opacity: .5; background: radial-gradient(circle at 50% 56%, rgba(15,33,71,.18), rgba(3,5,12,.52) 56%, rgba(2,4,10,.88) 100%), linear-gradient(90deg, rgba(4,6,16,.52), rgba(4,6,16,.14) 25%, rgba(4,6,16,.14) 75%, rgba(4,6,16,.6)); }
 
-.earth-background { position: absolute; inset: -6%; z-index: 0; background-image: url('/space-background.jpg'); background-size: cover; background-position: center; transform: translate3d(var(--bg-x), var(--bg-y), 0) scale(1.06); transform-origin: center; filter: saturate(.92) brightness(.46) contrast(1.02); will-change: transform; pointer-events: none; }
+.earth-background { position: absolute; inset: -6%; z-index: 0; background-image: url('/space-background.jpg'); background-size: cover; background-position: center; transform: translate3d(var(--bg-x), var(--bg-y), 0) scale(1.06); transform-origin: center; filter: saturate(.96) brightness(.73) contrast(1.01); will-change: transform; pointer-events: none; }
 .brand, .sky-brand { position: absolute; z-index: 10; left: 42px; top: 30px; letter-spacing: .28em; font-size: 14px; font-weight: 600; }
 .brand-mark, .sky-brand > span { color: #78c8ff; font-size: 19px; margin-right: 8px; text-shadow: 0 0 16px #78c8ff; }
 .hero-copy { position: absolute; z-index: 8; top: 82px; width: 100%; text-align: center; pointer-events: none; }
