@@ -21,32 +21,33 @@ from PIL import Image, ImageChops, ImageFilter
 
 # Exact titles appearing in Commons' category "Firmamentum Sobiescianum".
 PLATE = 'Johannes Hevelius - Prodromus Astronomia - Volume III "Firmamentum Sobiescianum, sive uranographia" - Tavola '
+# Exact names confirmed in the Wikimedia Commons Firmamentum Sobiescianum category.
 SOURCES = {
-    "And": "Andromeda Hevelius.jpg",
-    "Cas": "Cassiopea Hevelius.jpg",
-    "Cep": "Cepheus Hevelius 2.jpg",
-    "Per": "Perseus Hevelius.jpg",
+    "And": PLATE + "V - Andromeda.jpg",
+    "Cas": PLATE + "N - Cassiopeia.jpg",
+    "Cep": PLATE + "C - Cepheus.jpg",
+    "Per": PLATE + "W - Perseus.jpg",
     "Peg": PLATE + "T - Pegasus.jpg",
-    "Ori": "Orion constellation Hevelius.jpg",
-    "Her": "Hercules Hevelius.jpg",
-    "Cyg": "Cygnus.jpg",
+    "Ori": PLATE + "QQ - Orion.jpg",
+    "Her": PLATE + "H - Hercules et Cerberus.jpg",
+    "Cyg": PLATE + "K - Cygnus.jpg",
     "Aql": PLATE + "R - Aquila et Antinous.jpg",
-    "Dra": "Draco Hevelius.jpg",
-    "Leo": "Leo Hevelius.jpg",
-    "Tau": "Taurus by Johannes Hevelius.JPG",
-    "Gem": "Gemini Hevelius.jpg",
-    "UMa": "Ursa Major Hevelius.jpg",
-    "UMi": "Ursa Minor Hevelius.jpg",
-    "Sco": "Scorpio Hevelius.jpg",
-    "Boo": "Bootes.jpg",
+    "Dra": PLATE + "B - Draco.jpg",
+    "Leo": PLATE + "FF - Leo.jpg",
+    "Tau": PLATE + "CC - Taurus.jpg",
+    "Gem": PLATE + "DD - Gemini.jpg",
+    "UMa": PLATE + "D - Ursa Major.jpg",
+    "UMi": PLATE + "A - Ursa Minor.jpg",
+    "Sco": PLATE + "II - Scorpius.jpg",
+    "Boo": PLATE + "F - Bootes.jpg",
     "Aqr": PLATE + "MM - Aquarius.jpg",
     "Ari": PLATE + "BB - Aries.jpg",
-    "Cnc": "Cancer Hevelius.jpg",
+    "Cnc": PLATE + "EE - Cancer.jpg",
     "CMa": PLATE + "DDD - Canis Major.jpg",
-    "Lyr": "Hev 12 fig I lyra.jpg",
+    "Lyr": PLATE + "I - Lyra.jpg",
     "Oph": PLATE + "P - Serpens et Serpentarius.jpg",
-    "Sgr": "Sagittarius Hevelius.jpg",
-    "Cet": "Cetus Hevelius.jpg",
+    "Sgr": PLATE + "KK - Sagittarius.jpg",
+    "Cet": PLATE + "OO - Cetus.jpg",
 }
 
 OUTPUT = Path("public/constellation-art")
@@ -119,12 +120,13 @@ def main():
             print(f"FAILED {code}: {exc}", flush=True)
     (OUTPUT / "manifest.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
     zipfile_path = OUTPUT / "HEVELIUS_1690_ASTRA.zip"
+    # One portable ZIP for the user: unpack directly into public/constellation-art/.
+    # No ZIP should ever be committed into the Vite site's public directory.
     with zipfile.ZipFile(zipfile_path, "w", zipfile.ZIP_DEFLATED) as z:
         z.write(OUTPUT / "manifest.json", "manifest.json")
         for item in results:
-            for suffix, base in [(".jpg", ORIGINALS), (".webp", OUTPUT)]:
-                p = base / (item["id"] + suffix)
-                z.write(p, ("originals/" if suffix == ".jpg" else "webp/") + p.name)
+            p = OUTPUT / (item["id"] + ".webp")
+            z.write(p, p.name)
     print(f"RESULT: {len(results)}/{len(SOURCES)} images, ZIP: {zipfile_path}", flush=True)
     if errors:
         print("MISSING: " + " | ".join(errors), flush=True)
