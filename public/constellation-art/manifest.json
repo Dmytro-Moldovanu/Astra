@@ -1,26 +1,14 @@
 [
   {
     "id": "And",
-    "original": "Andromeda Hevelius.jpg",
-    "source": "https://commons.wikimedia.org/wiki/File:Andromeda_Hevelius.jpg",
+    "original": "Johannes Hevelius - Prodromus Astronomia - Volume III \"Firmamentum Sobiescianum, sive uranographia\" - Tavola V - Andromeda.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Johannes_Hevelius_-_Prodromus_Astronomia_-_Volume_III_%22Firmamentum_Sobiescianum%2C_sive_uranographia%22_-_Tavola_V_-_Andromeda.jpg",
     "license": "Public Domain – Johannes Hevelius, 1690"
   },
   {
     "id": "Cas",
-    "original": "Cassiopea Hevelius.jpg",
-    "source": "https://commons.wikimedia.org/wiki/File:Cassiopea_Hevelius.jpg",
-    "license": "Public Domain – Johannes Hevelius, 1690"
-  },
-  {
-    "id": "Cep",
-    "original": "Cepheus Hevelius 2.jpg",
-    "source": "https://commons.wikimedia.org/wiki/File:Cepheus_Hevelius_2.jpg",
-    "license": "Public Domain – Johannes Hevelius, 1690"
-  },
-  {
-    "id": "Per",
-    "original": "Perseus Hevelius.jpg",
-    "source": "https://commons.wikimedia.org/wiki/File:Perseus_Hevelius.jpg",
+    "original": "Johannes Hevelius - Prodromus Astronomia - Volume III \"Firmamentum Sobiescianum, sive uranographia\" - Tavola N - Cassiopeia.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Johannes_Hevelius_-_Prodromus_Astronomia_-_Volume_III_%22Firmamentum_Sobiescianum%2C_sive_uranographia%22_-_Tavola_N_-_Cassiopeia.jpg",
     "license": "Public Domain – Johannes Hevelius, 1690"
   }
 ]
