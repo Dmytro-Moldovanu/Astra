@@ -1,0 +1,20 @@
+[
+  {
+    "id": "And",
+    "original": "Andromeda Hevelius.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Andromeda_Hevelius.jpg",
+    "license": "Public Domain – Johannes Hevelius, 1690"
+  },
+  {
+    "id": "Cas",
+    "original": "Cassiopea Hevelius.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Cassiopea_Hevelius.jpg",
+    "license": "Public Domain – Johannes Hevelius, 1690"
+  },
+  {
+    "id": "Per",
+    "original": "Perseus Hevelius.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Perseus_Hevelius.jpg",
+    "license": "Public Domain – Johannes Hevelius, 1690"
+  }
+]
