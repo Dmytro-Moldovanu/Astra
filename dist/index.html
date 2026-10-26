@@ -5,58 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#050816" />
     <title>ASTRA — Interaktiver Sternenatlas</title>
-    <script type="module" crossorigin src="./assets/index-BMUbdzuT.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BicO_rd1.css">
+    <script type="module" crossorigin src="./assets/index-0WwW1sk_.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-VoWQfJYm.css">
   </head>
   <body>
     <div id="root"></div>
-  
-    <script>
-      (() => {
-        const attachParallax = (screen) => {
-          if (!(screen instanceof HTMLElement)) return;
-          if (!screen.querySelector('.earth-background')) {
-            const bg = document.createElement('div');
-            bg.className = 'earth-background';
-            bg.setAttribute('aria-hidden', 'true');
-            screen.prepend(bg);
-          }
-          if (screen.dataset.parallaxReady === '1') return;
-          screen.dataset.parallaxReady = '1';
-          let targetX = 0, targetY = 0, currentX = 0, currentY = 0, raf = null;
-          const update = () => {
-            currentX += (targetX - currentX) * 0.09;
-            currentY += (targetY - currentY) * 0.09;
-            screen.style.setProperty('--bg-x', currentX.toFixed(2) + 'px');
-            screen.style.setProperty('--bg-y', currentY.toFixed(2) + 'px');
-            if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
-              raf = requestAnimationFrame(update);
-            } else {
-              raf = null;
-            }
-          };
-          const queue = () => { if (raf == null) raf = requestAnimationFrame(update); };
-          screen.addEventListener('mousemove', (event) => {
-            const rect = screen.getBoundingClientRect();
-            const x = (event.clientX - rect.left) / rect.width - 0.5;
-            const y = (event.clientY - rect.top) / rect.height - 0.5;
-            targetX = -x * 22;
-            targetY = -y * 16;
-            queue();
-          });
-          screen.addEventListener('mouseleave', () => {
-            targetX = 0; targetY = 0; queue();
-          });
-        };
-        const scan = () => document.querySelectorAll('.earth-screen').forEach(attachParallax);
-        new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', scan, { once: true });
-        } else {
-          scan();
-        }
-      })();
-    </script>
-
   </body>
 </html>
