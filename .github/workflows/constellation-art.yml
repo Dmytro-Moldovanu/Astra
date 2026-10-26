@@ -22,9 +22,16 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install --disable-pip-version-check Pillow
       - run: python scripts/build_constellation_art.py
+      - name: Upload downloadable ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HEVELIUS-1690-ASTRA
+          path: public/constellation-art/HEVELIUS_1690_ASTRA.zip
+          if-no-files-found: warn
       - name: Commit imported files
         run: |
-          git add public/constellation-art/*.webp
+          git add public/constellation-art/*.webp public/constellation-art/manifest.json
           if ! git diff --cached --quiet; then
             git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Import public-domain constellation atlas plates"
             git push
