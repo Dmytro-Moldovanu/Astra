@@ -271,7 +271,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: auf Auswahl zoomen · Ziehen: drehen</div>
 
     {selected && <aside className="info-card glass">
-      <button className="close" onClick={() => setSelected(null)}>×</button>
+      <button className="close" onClick={() => { setSelected(null); setFocus(null) }}>×</button>
       <p className="eyebrow">{selected.kind === 'star' ? 'STERN' : 'STERNBILD'}</p>
       {selected.kind === 'star' ? <>
         <h2>{STAR_ALIASES[selected.star.name || ''] || selected.star.name}</h2>
