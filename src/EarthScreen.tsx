@@ -17,7 +17,6 @@ type Props = {
 export default function EarthScreen(props: Props) {
   const globeRef = useRef<any>(null)
   const screenRef = useRef<HTMLElement | null>(null)
-  const panelRef = useRef<HTMLElement | null>(null)
   const parallaxFrame = useRef<number | null>(null)
   const [selected, setSelected] = useState(true)
   // The globe renderer occupies the entire viewport, not a fixed square.
@@ -92,36 +91,6 @@ export default function EarthScreen(props: Props) {
     }
   }, [])
 
-  // Anchor the information card to the apparent edge of the atmospheric glow.
-  // The visual radius changes with zoom; a fixed vw offset cannot track it.
-  const updatePanelPosition = () => {
-    const globe = globeRef.current
-    const camera = globe?.camera?.()
-    const screen = screenRef.current
-    if (!camera || !screen) return
-
-    const globeRadius: number = globe.getGlobeRadius()
-    const atmosphereRadius = globeRadius * 1.11
-    const cameraDistance: number = camera.position.length()
-    if (cameraDistance <= atmosphereRadius) return
-
-    const halfFov = (camera.fov * Math.PI) / 360
-    const radiusPx = (viewport.height / 2) *
-      (atmosphereRadius / Math.sqrt(cameraDistance ** 2 - atmosphereRadius ** 2)) /
-      Math.tan(halfFov)
-
-    if (!Number.isFinite(radiusPx)) return
-    const panelWidth = panelRef.current?.offsetWidth ?? 340
-    const nearAtmosphere = viewport.width / 2 + radiusPx + 6
-    const keepOnScreen = viewport.width - panelWidth - 16
-    screen.style.setProperty('--panel-left', `${Math.round(Math.min(nearAtmosphere, keepOnScreen))}px`)
-  }
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(updatePanelPosition)
-    return () => cancelAnimationFrame(frame)
-  }, [viewport.width, viewport.height])
-
   const marker = useMemo(() => [{ ...props.location, size: .75 }], [props.location])
 
   const choose = (location: Location) => {
@@ -143,8 +112,6 @@ export default function EarthScreen(props: Props) {
       <div className="globe-aura" />
       <Globe
         ref={globeRef}
-        onGlobeReady={updatePanelPosition}
-        onZoom={updatePanelPosition}
         width={viewport.width} height={viewport.height}
         backgroundColor="rgba(0,0,0,0)"
         globeImageUrl="./earth-day.jpg"
@@ -164,7 +131,7 @@ export default function EarthScreen(props: Props) {
       <div className="drag-hint">↔ Ziehen zum Drehen · Scrollen zum Zoomen</div>
     </div>
 
-    <aside ref={panelRef} className={`location-panel ${selected ? 'visible' : ''}`}>
+    <aside className={`location-panel ${selected ? 'visible' : ''}`}>
       <div className="panel-head">
         <div><p className="eyebrow">BEOBACHTUNGSORT</p><h2>{props.location.name}</h2></div>
         <span className="live-dot" />
