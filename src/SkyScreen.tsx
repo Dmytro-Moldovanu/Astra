@@ -99,10 +99,16 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       ctx.fill()
 
       const angle = rotation * Math.PI / 180
-      const targetFocus = focus
+      const intendedFocus = focus
         ? { x: focus.x * Math.cos(angle) - focus.y * Math.sin(angle),
             y: focus.x * Math.sin(angle) + focus.y * Math.cos(angle) }
         : { x: 0, y: 0 }
+      // Never pan beyond the real visible sky hemisphere: the round viewport
+      // must not expose an empty crescent where no above-horizon stars exist.
+      const maxOffset = 1 - 1 / zoom
+      const focusLength = Math.hypot(intendedFocus.x, intendedFocus.y)
+      const focusRatio = focusLength > maxOffset && focusLength > 0 ? maxOffset / focusLength : 1
+      const targetFocus = { x: intendedFocus.x * focusRatio, y: intendedFocus.y * focusRatio }
       const currentFocus = currentFocusRef.current
       const distance = Math.hypot(targetFocus.x - currentFocus.x, targetFocus.y - currentFocus.y)
       const moving = distance > .0006
@@ -203,6 +209,15 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     return nearestLine ? { kind: 'constellation', constellation: nearestLine.constellation } : null
   }
 
+  const focusOnPoint = (point: SkyFocus) => {
+    // Near-horizon targets need more zoom before they can approach the center
+    // without leaving an unpopulated ring around the star field.
+    const distance = Math.hypot(point.x, point.y)
+    const requiredZoom = Math.min(5, Math.max(1.25, 1 / Math.max(.2, 1 - distance)))
+    setZoom((z) => Math.max(z, requiredZoom))
+    setFocus(point)
+  }
+
   const focusOnConstellation = (constellation: Constellation) => {
     const entry = horizontal?.linePoints.find(({ constellation: item }) => item.id === constellation.id)
     if (!entry) return
@@ -216,15 +231,14 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     if (!visiblePoints.length) return
     // Visible segments, not the catalog center: some constellations cross the horizon.
     const xs = visiblePoints.map((p) => p.x), ys = visiblePoints.map((p) => p.y)
-    setFocus({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 })
-    setZoom((z) => Math.max(z, 1.25))
+    focusOnPoint({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 })
   }
 
   const focusOnStar = (star: Star) => {
     const pos = horizontal?.starPoints.find(({ star: item }) => item.id === star.id)?.pos
     if (!pos || pos.altitude < 0) return
     const r = (90 - pos.altitude) / 90, a = pos.azimuth * Math.PI / 180
-    setFocus({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
+    focusOnPoint({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
   }
 
   const pointer = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -250,7 +264,34 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         else if (hit?.kind === 'star') focusOnStar(hit.star)
       }}
       onPointerLeave={() => { dragRef.current = null; setHovered(null) }}
-      onWheel={(e) => { e.preventDefault(); setZoom((z) => Math.max(.72, Math.min(3.2, z - e.deltaY * .0008))) }}
+      onWheel={(e) => {
+        e.preventDefault()
+        // The sky chart fills its circular frame at 1x. Going below 1x
+        // shrank the stars while leaving a large empty border behind.
+        const nextZoom = Math.max(1, Math.min(5, zoom - e.deltaY * .0008))
+        if (nextZoom === zoom) return
+        const rect = e.currentTarget.getBoundingClientRect()
+        const radius = Math.min(rect.width, rect.height) * .54
+        const x = (e.clientX - rect.left - rect.width / 2) / radius
+        const y = (e.clientY - rect.top - rect.height / 2) / radius
+        const insideChart = Math.hypot(x, y) <= 1
+        const anchorX = insideChart ? x : 0, anchorY = insideChart ? y : 0
+        const previous = currentFocusRef.current
+        const delta = 1 / zoom - 1 / nextZoom
+        let fx = previous.x + anchorX * delta
+        let fy = previous.y + anchorY * delta
+        // Keep the full visible sky inside the fixed circular viewport.
+        const maxOffset = 1 - 1 / nextZoom
+        const distance = Math.hypot(fx, fy)
+        if (distance > maxOffset && distance > 0) {
+          fx *= maxOffset / distance
+          fy *= maxOffset / distance
+        }
+        const a = rotation * Math.PI / 180
+        currentFocusRef.current = { x: fx, y: fy }
+        setFocus({ x: fx * Math.cos(a) + fy * Math.sin(a), y: -fx * Math.sin(a) + fy * Math.cos(a) })
+        setZoom(nextZoom)
+      }}
       aria-label="Interaktiver Sternenhimmel" />
 
     <div className="sky-brand"><span>✦</span> ASTRA <small>STERNENATLAS</small></div>
@@ -268,7 +309,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     <div className="observation glass"><span className="live-dot" /><div><strong>{location.name}</strong><small>{formatLocal(date, location.timeZone)}</small></div></div>
     {daytime && <div className="day-warning">☀ Tageszeit gewählt: Lehransicht ohne Sonnenlichtsimulation</div>}
     {!catalog && <div className="loading">Sternkatalog wird geladen …</div>}
-    <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: auf Auswahl zoomen · Ziehen: drehen</div>
+    <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: am Mauszeiger zoomen · Ziehen: drehen</div>
 
     {selected && <aside className="info-card glass">
       <button className="close" onClick={() => { setSelected(null); setFocus(null) }}>×</button>
