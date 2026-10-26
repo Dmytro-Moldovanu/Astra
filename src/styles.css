@@ -92,3 +92,11 @@ button { color: inherit; }
 .mythic-sketch.engraving-fallback { display: none; }
 @media (max-width: 900px) { .mythic-engraving { width: 46px; height: 46px; flex-basis: 46px; } }
 @media (max-width: 700px) { .mythic-engraving.large { width: 62px; height: 62px; flex-basis: 62px; } }
+
+/* Stellarium artwork: simplified illustrations, not historical engraving scans. */
+.mythic-engraving { object-fit: contain; }
+.mythic-engraving.large { width: 152px; height: 152px; flex: 0 0 152px; }
+.mythic-detail-art { align-items: center; }
+.mythic-detail-art .mythic-engraving.large { width: 152px; height: 152px; flex: 0 0 152px; }
+.mythic-panel-footnote a { color: #a4c7f3; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 700px) { .mythic-detail-art .mythic-engraving.large { width: 108px; height: 108px; flex-basis: 108px; } }

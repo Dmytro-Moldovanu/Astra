@@ -410,7 +410,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
             <span className="mythic-item-arrow">›</span>
           </button>) : <p className="mythic-empty">Keine illustrierten Sternbilder über dem Horizont.</p>}
         </div>
-        <p className="mythic-panel-footnote">Schematische Zeichnungen · keine Sternpositionen</p>
+        <p className="mythic-panel-footnote">Illustrationen: <a href="https://github.com/Stellarium/stellarium-skycultures/tree/master/western" target="_blank" rel="noopener noreferrer">Johan Meuris / Stellarium</a> · <a href="https://artlibre.org/licence/lal/en/" target="_blank" rel="noopener noreferrer">Free Art License 1.3</a></p>
       </>}
     </section>}
 
