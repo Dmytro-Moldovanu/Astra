@@ -1016,7 +1016,10 @@ export const illustratedConstellationIds = Object.keys(mythicFigures)
 export function MythicSketch({ id, large = false }: { id: string; large?: boolean }) {
   const figure = mythicFigures[id]
   if (!figure) return null
-  return <svg className={large ? 'mythic-sketch large' : 'mythic-sketch'} viewBox="0 0 80 80" fill="none"
+  return <>
+    <img className={large ? 'mythic-engraving large' : 'mythic-engraving'} src={`./constellation-art/${id}.webp`} alt={figure.caption}
+      onError={(event) => { event.currentTarget.style.display = 'none'; event.currentTarget.nextElementSibling?.classList.remove('engraving-fallback') }} />
+    <svg className={large ? 'mythic-sketch large engraving-fallback' : 'mythic-sketch engraving-fallback'} viewBox="0 0 80 80" fill="none"
     strokeLinecap="round" strokeLinejoin="round" role="img" aria-label={figure.caption}>
     <title>{figure.caption}</title>
     <desc>{figure.anatomy || 'Symbolische Darstellung einer Figur am Sternenhimmel'}</desc>
@@ -1030,4 +1033,5 @@ export function MythicSketch({ id, large = false }: { id: string; large?: boolea
       {line.map(([x, y], j) => <circle key={j} cx={x} cy={y} r=".95" stroke="none" fill="#eff5ff"/>)}
     </g>)}
   </svg>
+  </> 
 }
