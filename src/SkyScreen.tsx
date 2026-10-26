@@ -82,9 +82,8 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         canvas.width = width * dpr; canvas.height = height * dpr
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      const gradient = ctx.createRadialGradient(width / 2, height * .43, 0, width / 2, height * .5, Math.max(width, height) * .7)
-      gradient.addColorStop(0, '#0a1834'); gradient.addColorStop(.55, '#060b1c'); gradient.addColorStop(1, '#02040d')
-      ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height)
+      // Keep the astronomical layer transparent so the subtle decorative backdrop stays separate.
+      ctx.clearRect(0, 0, width, height)
       const radius = Math.min(width, height) * .54
       const project = (azimuth: number, altitude: number) => {
         const r = ((90 - altitude) / 90) * radius * zoom
