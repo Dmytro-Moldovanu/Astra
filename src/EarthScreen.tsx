@@ -114,9 +114,9 @@ export default function EarthScreen(props: Props) {
         ref={globeRef}
         width={viewport.width} height={viewport.height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="./earth.svg"
-        bumpImageUrl="./earth-bump.svg"
-        showAtmosphere atmosphereColor="#78c8ff" atmosphereAltitude={.2}
+        globeImageUrl="./earth-day.jpg"
+        bumpImageUrl="./earth-bump.png"
+        showAtmosphere atmosphereColor="#78c8ff" atmosphereAltitude={.11}
         pointsData={marker}
         pointLat="lat" pointLng="lng" pointColor={() => '#ffffff'}
         pointAltitude={.025} pointRadius="size"
