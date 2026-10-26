@@ -11,12 +11,19 @@ on:
 permissions:
   contents: write
 
+# Prevent simultaneous imports from racing when other ASTRA edits land on main.
+concurrency:
+  group: constellation-art-main
+  cancel-in-progress: false
+
 jobs:
   import-art:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -29,10 +36,30 @@ jobs:
           name: HEVELIUS-1690-ASTRA
           path: public/constellation-art/HEVELIUS_1690_ASTRA.zip
           if-no-files-found: warn
-      - name: Commit imported files
+      - name: Commit imported files safely
+        shell: bash
         run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/constellation-art/*.webp public/constellation-art/manifest.json
-          if ! git diff --cached --quiet; then
-            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Import public-domain constellation atlas plates"
-            git push
+          if git diff --cached --quiet; then
+            echo "No new images to commit."
+            exit 0
           fi
+          git commit -m "Import public-domain constellation atlas plates"
+
+          # Work alongside commits written to main by the ASTRA editor.
+          # Never force push, discard a concurrent change, or overwrite files.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              echo "Engravings saved to main."
+              exit 0
+            fi
+            echo "main moved during push; retry $attempt/5"
+            sleep $((attempt * 2))
+          done
+          echo "Could not save imported images after 5 safe attempts."
+          exit 1
