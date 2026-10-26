@@ -106,10 +106,21 @@ def convert(data: bytes, destination: Path) -> None:
 
 
 def main() -> None:
+    failures = []
     for constellation, filename in SOURCES.items():
         destination = DEST / f"{constellation}.webp"
         print(f"Fetching {filename}", flush=True)
-        convert(download(filename), destination)
+        try:
+            convert(download(filename), destination)
+        except Exception as exc:
+            failures.append((constellation, str(exc)))
+            print(f"FAILED {constellation}: {exc}", flush=True)
+    print(f"Prepared {len(SOURCES) - len(failures)}/{len(SOURCES)} images", flush=True)
+    if failures:
+        for code, error in failures:
+            print(f"  {code}: {error}", flush=True)
+    if len(failures) == len(SOURCES):
+        raise RuntimeError("No source artwork could be retrieved")
 
 
 if __name__ == "__main__":
