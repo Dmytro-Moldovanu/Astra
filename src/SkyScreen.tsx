@@ -44,6 +44,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
   location: Location; date: Date; onDate: (date: Date) => void; onBack: () => void
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const infoCardRef = useRef<HTMLElement>(null)
   const hitRef = useRef<{ stars: ScreenPoint[]; lines: ScreenLine[] }>({ stars: [], lines: [] })
   const dragRef = useRef<{ x: number; rotation: number } | null>(null)
   const currentFocusRef = useRef<SkyFocus>({ x: 0, y: 0 })
@@ -189,6 +190,48 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       ctx.strokeStyle = 'rgba(120,200,255,.28)'; ctx.lineWidth = 1
       ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.stroke()
       hitRef.current = { stars, lines }
+
+      // Position the details card beside the constellation's visible shape,
+      // rather than at a fixed distance from the celestial map.
+      const card = infoCardRef.current
+      if (card && selected && width > 700) {
+        const visiblePoints: { x: number; y: number }[] = []
+        if (selected.kind === 'constellation') {
+          const entry = horizontal.linePoints.find(({ constellation }) => constellation.id === selected.constellation.id)
+          entry?.lines.forEach((line) => line.forEach((pos) => {
+            if (pos.altitude < 0) return
+            const p = project(pos.azimuth, pos.altitude)
+            if (onChart(p.x, p.y)) visiblePoints.push(p)
+          }))
+        } else {
+          const pos = horizontal.starPoints.find(({ star }) => star.id === selected.star.id)?.pos
+          if (pos && pos.altitude >= 0) {
+            const p = project(pos.azimuth, pos.altitude)
+            if (onChart(p.x, p.y)) visiblePoints.push(p)
+          }
+        }
+
+        if (visiblePoints.length) {
+          const minX = Math.min(...visiblePoints.map((p) => p.x))
+          const maxX = Math.max(...visiblePoints.map((p) => p.x))
+          const minY = Math.min(...visiblePoints.map((p) => p.y))
+          const maxY = Math.max(...visiblePoints.map((p) => p.y))
+          const cardWidth = card.offsetWidth
+          const cardHeight = card.offsetHeight
+          const gap = 18
+          // Prefer immediately to the right. Flip left only if the card
+          // would run off screen; always keep the close button accessible.
+          const rightOfSelection = maxX + gap
+          const leftOfSelection = minX - cardWidth - gap
+          const left = rightOfSelection + cardWidth + 12 <= width
+            ? rightOfSelection
+            : leftOfSelection >= 12 ? leftOfSelection : Math.max(12, width - cardWidth - 12)
+          const top = Math.max(cardHeight / 2 + 12, Math.min(height - cardHeight / 2 - 12, (minY + maxY) / 2))
+          card.style.setProperty('--info-left', `${Math.round(left)}px`)
+          card.style.setProperty('--info-top', `${Math.round(top)}px`)
+        }
+      }
+
       if (moving) frame = requestAnimationFrame(draw)
     }
     frame = requestAnimationFrame(draw)
@@ -311,7 +354,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     {!catalog && <div className="loading">Sternkatalog wird geladen …</div>}
     <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: am Mauszeiger zoomen · Ziehen: drehen</div>
 
-    {selected && <aside className="info-card glass">
+    {selected && <aside ref={infoCardRef} className="info-card glass">
       <button className="close" onClick={() => { setSelected(null); setFocus(null) }}>×</button>
       <p className="eyebrow">{selected.kind === 'star' ? 'STERN' : 'STERNBILD'}</p>
       {selected.kind === 'star' ? <>
