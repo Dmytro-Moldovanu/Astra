@@ -45,6 +45,28 @@ def commons_file_url(filename: str) -> str:
 def download(filename: str) -> bytes:
     direct = commons_file_url(filename)
     special = "https://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(filename)
+    search_api = ("https://commons.wikimedia.org/w/api.php?action=query&generator=search"
+                  "&gsrnamespace=6&gsrsearch=" + urllib.parse.quote("intitle:Hevelius " + filename.split(" Hevelius")[0].replace(".jpg",""))
+                  + "&gsrlimit=12&prop=imageinfo&iiprop=url|extmetadata&format=json")
+    try:
+        import json
+        request = urllib.request.Request(search_api, headers={"User-Agent": "ASTRA-ConstellationAtlas/1.0 (contact via GitHub)"})
+        with urllib.request.urlopen(request, timeout=30) as response:
+            result = json.load(response)
+        pages = list(result.get("query", {}).get("pages", {}).values())
+        for page in pages:
+            title = page.get("title", "").lower()
+            info = (page.get("imageinfo") or [{}])[0]
+            license_tag = (info.get("extmetadata", {}).get("LicenseShortName", {}).get("value", "") or "").lower()
+            if ("hevelius" in title and ("public domain" in license_tag or license_tag in ("pd", "cc0"))):
+                source = info.get("url")
+                if source:
+                    with urllib.request.urlopen(urllib.request.Request(source, headers={"User-Agent":"ASTRA-ConstellationAtlas/1.0"}), timeout=40) as response:
+                        payload = response.read()
+                        if len(payload) > 8000:
+                            return payload
+    except Exception as exc:
+        print(f"Commons search not available for {filename}: {exc}", flush=True)
     for address in (direct, special):
         for attempt in range(3):
             request = urllib.request.Request(
