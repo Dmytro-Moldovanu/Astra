@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatLocal, toHorizontal } from './astronomy'
 import { highlightedStarNames } from './data'
 import { constellationDescriptions } from './constellationDescriptions'
+import { constellationMyths } from './constellationMyths'
 import { MythicSketch, illustratedConstellationIds, mythicFigures } from './mythicConstellations'
 import type { Constellation, Location, Selection, Star } from './types'
 
@@ -426,6 +427,10 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         <p className="latin">{selected.constellation.latin}</p>
         {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large /><span>{mythicFigures[selected.constellation.id].caption}</span></div>}
         <p>{constellationDescriptions[selected.constellation.id] ?? 'Ein Sternbild mit eigener Geschichte am Nachthimmel.'}</p>
+        {constellationMyths[selected.constellation.id] && <section className="mythic-story" aria-label="Mythologie">
+          <h3>Mythologie</h3>
+          <p>{constellationMyths[selected.constellation.id]}</p>
+        </section>}
         <dl><div><dt>Kürzel</dt><dd>{selected.constellation.id}</dd></div><div><dt>Sichtbare Linien</dt><dd>{selected.constellation.lines.length}</dd></div></dl>
       </>}
     </aside>}
