@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/EarthScreen.tsx","./src/SkyScreen.tsx","./src/astronomy.ts","./src/data.ts","./src/main.tsx","./src/types.ts","./src/tz-lookup.d.ts"],"errors":true,"version":"5.8.3"}

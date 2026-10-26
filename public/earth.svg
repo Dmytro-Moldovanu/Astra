@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1024" viewBox="0 0 2048 1024">
+  <defs>
+    <radialGradient id="o"><stop stop-color="#245784"/><stop offset=".65" stop-color="#0b2b50"/><stop offset="1" stop-color="#06162f"/></radialGradient>
+    <filter id="n"><feTurbulence baseFrequency=".018" numOctaves="4" seed="8"/><feColorMatrix values=".4 0 0 0 .2  .5 0 0 0 .3  .3 0 0 0 .5  0 0 0 .23 0"/></filter>
+  </defs>
+  <rect width="2048" height="1024" fill="url(#o)"/>
+  <g fill="#287061" stroke="#50a58b" stroke-width="3" opacity=".95">
+    <path d="M80 223l105-83 139-31 88 35 114 9 63 65-30 61-107 15-54 65-35 96-72 3-37-84-73-35-87 7-50-58z"/>
+    <path d="M421 484l102 31 68 91-19 96-62 105-28 119-49-28-24-148-64-114 24-103z"/>
+    <path d="M921 197l135-58 152 11 76 50 125-23 124 49 160 1 161 94-48 65-164-7-82 54-75-14-41 58-91 5-16-74-76-18-40 91-67-17-57-94-118-26-63-64z"/>
+    <path d="M1034 395l115 6 92 85 47 110-54 169-88 75-65-152-57-112-74-75z"/>
+    <path d="M1699 669l99-54 118 36 55 75-45 87-139 9-87-66z"/>
+    <path d="M1881 291l70-39 70 45-26 50-87 10z"/>
+  </g>
+  <rect width="2048" height="1024" filter="url(#n)" opacity=".32"/>
+  <g fill="none" stroke="#9ce6e0" opacity=".12"><path d="M0 256h2048M0 512h2048M0 768h2048"/><path d="M512 0v1024M1024 0v1024M1536 0v1024"/></g>
+</svg>
