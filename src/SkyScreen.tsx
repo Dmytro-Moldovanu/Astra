@@ -49,6 +49,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
   const hitRef = useRef<{ stars: ScreenPoint[]; lines: ScreenLine[] }>({ stars: [], lines: [] })
   const dragRef = useRef<{ x: number; rotation: number } | null>(null)
   const currentFocusRef = useRef<SkyFocus>({ x: 0, y: 0 })
+  const atlasRevealRef = useRef(0) // Fade in real stars below the horizon while exploring
   const [focus, setFocus] = useState<SkyFocus | null>(null)
   const [catalog, setCatalog] = useState<CatalogData | null>(null)
   const [rotation, setRotation] = useState(0)
@@ -105,9 +106,9 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         ? { x: focus.x * Math.cos(angle) - focus.y * Math.sin(angle),
             y: focus.x * Math.sin(angle) + focus.y * Math.cos(angle) }
         : { x: 0, y: 0 }
-      // Never pan beyond the real visible sky hemisphere: the round viewport
-      // must not expose an empty crescent where no above-horizon stars exist.
-      const maxOffset = 1 - 1 / zoom
+      // In atlas mode the real star catalog continues below the local horizon.
+      // Only constrain normal sky viewing, where sub-horizon stars are hidden.
+      const maxOffset = selected ? 1.75 : 1 - 1 / zoom
       const focusLength = Math.hypot(intendedFocus.x, intendedFocus.y)
       const focusRatio = focusLength > maxOffset && focusLength > 0 ? maxOffset / focusLength : 1
       const targetFocus = { x: intendedFocus.x * focusRatio, y: intendedFocus.y * focusRatio }
@@ -121,6 +122,14 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         currentFocus.x = targetFocus.x
         currentFocus.y = targetFocus.y
       }
+      // Keep the extended catalog visible until the view has returned home;
+      // the true horizon gradually comes back when the detail card closes.
+      const revealTarget = selected ? 1 : Math.min(1, Math.hypot(currentFocus.x, currentFocus.y) * 3)
+      const reveal = atlasRevealRef.current
+      const revealMoving = Math.abs(revealTarget - reveal) > .004
+      atlasRevealRef.current = revealMoving ? reveal + (revealTarget - reveal) * .18 : revealTarget
+      const atlasOpacity = atlasRevealRef.current
+
       const project = (azimuth: number, altitude: number) => {
         const r = ((90 - altitude) / 90) * radius * zoom
         const a = (azimuth + rotation) * Math.PI / 180
@@ -139,23 +148,28 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       if (showLines) {
         horizontal.linePoints.forEach(({ constellation, lines: sourceLines }) => sourceLines.forEach((line) => {
           for (let i = 1; i < line.length; i += 1) {
-            if (line[i - 1].altitude < 0 || line[i].altitude < 0) continue
+            const belowHorizon = line[i - 1].altitude < 0 || line[i].altitude < 0
+            if (belowHorizon && atlasOpacity < .01) continue
             const a = project(line[i - 1].azimuth, line[i - 1].altitude)
             const b = project(line[i].azimuth, line[i].altitude)
             const active = selected?.kind === 'constellation' && selected.constellation.id === constellation.id
             const hover = hovered?.kind === 'constellation' && hovered.constellation.id === constellation.id
             ctx.strokeStyle = active ? 'rgba(151,117,250,.92)' : hover ? 'rgba(120,200,255,.72)' : 'rgba(120,200,255,.14)'
             ctx.lineWidth = active ? 2 : hover ? 1.6 : .8
+            ctx.globalAlpha = belowHorizon ? atlasOpacity * .7 : 1
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke()
-            lines.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, constellation })
+            ctx.globalAlpha = 1
+            if (!belowHorizon || atlasOpacity > .55) lines.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, constellation })
           }
         }))
       }
       const stars: ScreenPoint[] = []
       horizontal.starPoints.forEach(({ star, pos }) => {
-        if (pos.altitude < 0) return
+        const belowHorizon = pos.altitude < 0
+        if (belowHorizon && atlasOpacity < .01) return
         const p = project(pos.azimuth, pos.altitude)
         if (!onChart(p.x, p.y)) return
+        ctx.globalAlpha = belowHorizon ? atlasOpacity * .8 : 1
         const notable = star.name && highlightedStarNames.has(star.name)
         const size = Math.max(.45, Math.min(4.6, (6.4 - star.mag) * .48)) * (notable ? 1.24 : 1)
         if (notable) {
@@ -170,22 +184,27 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
           ctx.fillStyle = 'rgba(247,250,255,.78)'; ctx.font = '11px Inter, sans-serif'
           ctx.fillText(STAR_ALIASES[star.name!] || star.name!, p.x + size + 5, p.y - 4)
         }
+        ctx.globalAlpha = 1
       })
       if (showLines) horizontal.linePoints.forEach(({ constellation, center }) => {
-        if (center.altitude < 0) return
+        if (center.altitude < 0 && atlasOpacity < .01) return
         const isHover = hovered?.kind === 'constellation' && hovered.constellation.id === constellation.id
         const isActive = selected?.kind === 'constellation' && selected.constellation.id === constellation.id
         if (isHover || isActive) {
           const p = project(center.azimuth, center.altitude)
+          ctx.globalAlpha = center.altitude < 0 ? atlasOpacity * .8 : 1
           ctx.textAlign = 'center'; ctx.fillStyle = isActive ? '#c9baff' : '#9ddaff'; ctx.font = '600 13px Inter, sans-serif'
           ctx.fillText(constellation.name, p.x, p.y); ctx.textAlign = 'left'
+          ctx.globalAlpha = 1
         }
       })
       ctx.fillStyle = 'rgba(210,230,255,.55)'; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'
+      ctx.globalAlpha = 1 - atlasOpacity
       ;[['N', 0], ['O', 90], ['S', 180], ['W', 270]].forEach(([label, az]) => {
         const p = project(Number(az), 0)
         if (Math.hypot(p.x - cx, p.y - cy) <= radius + 4) ctx.fillText(String(label), p.x, p.y + 4)
       })
+      ctx.globalAlpha = 1
       ctx.textAlign = 'left'
       ctx.restore()
       ctx.strokeStyle = 'rgba(120,200,255,.28)'; ctx.lineWidth = 1
@@ -200,7 +219,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         if (selected.kind === 'constellation') {
           const entry = horizontal.linePoints.find(({ constellation }) => constellation.id === selected.constellation.id)
           entry?.lines.forEach((line) => line.forEach((pos) => {
-            if (pos.altitude < 0) return
+            if (pos.altitude < -45) return
             const p = project(pos.azimuth, pos.altitude)
             if (onChart(p.x, p.y)) visiblePoints.push(p)
           }))
@@ -233,7 +252,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         }
       }
 
-      if (moving) frame = requestAnimationFrame(draw)
+      if (moving || revealMoving) frame = requestAnimationFrame(draw)
     }
     frame = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(frame)
@@ -253,12 +272,9 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     return nearestLine ? { kind: 'constellation', constellation: nearestLine.constellation } : null
   }
 
-  const focusOnPoint = (point: SkyFocus) => {
-    // Near-horizon targets need more zoom before they can approach the center
-    // without leaving an unpopulated ring around the star field.
-    const distance = Math.hypot(point.x, point.y)
-    const requiredZoom = Math.min(5, Math.max(1.25, 1 / Math.max(.2, 1 - distance)))
-    setZoom((z) => Math.max(z, requiredZoom))
+  const focusOnPoint = (point: SkyFocus, targetZoom: number) => {
+    // Explore the real sky catalog on both sides of the horizon.
+    setZoom(Math.max(1.1, Math.min(5, targetZoom)))
     setFocus(point)
   }
 
@@ -267,22 +283,25 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     if (!entry) return
     const visiblePoints: SkyFocus[] = []
     entry.lines.forEach((line) => line.forEach((pos) => {
-      if (pos.altitude < 0) return
+      // The selected shape may cross the horizon: include its nearby hidden stars.
+      if (pos.altitude < -45) return
       const r = (90 - pos.altitude) / 90
       const a = pos.azimuth * Math.PI / 180
       visiblePoints.push({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
     }))
     if (!visiblePoints.length) return
-    // Visible segments, not the catalog center: some constellations cross the horizon.
     const xs = visiblePoints.map((p) => p.x), ys = visiblePoints.map((p) => p.y)
-    focusOnPoint({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 })
+    const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), .36)
+    // Fit the constellation instead of forcing a 5× crop near the horizon.
+    const fitZoom = Math.max(1.2, Math.min(3.5, 1.3 / span))
+    focusOnPoint({ x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 }, fitZoom)
   }
 
   const focusOnStar = (star: Star) => {
     const pos = horizontal?.starPoints.find(({ star: item }) => item.id === star.id)?.pos
     if (!pos || pos.altitude < 0) return
     const r = (90 - pos.altitude) / 90, a = pos.azimuth * Math.PI / 180
-    focusOnPoint({ x: Math.sin(a) * r, y: -Math.cos(a) * r })
+    focusOnPoint({ x: Math.sin(a) * r, y: -Math.cos(a) * r }, 2.5)
   }
 
   const pointer = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -306,6 +325,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         setSelected(hit)
         if (hit?.kind === 'constellation') focusOnConstellation(hit.constellation)
         else if (hit?.kind === 'star') focusOnStar(hit.star)
+        else { setFocus(null); setZoom(1) }
       }}
       onPointerLeave={() => { dragRef.current = null; setHovered(null) }}
       onWheel={(e) => {
@@ -324,8 +344,9 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         const delta = 1 / zoom - 1 / nextZoom
         let fx = previous.x + anchorX * delta
         let fy = previous.y + anchorY * delta
-        // Keep the full visible sky inside the fixed circular viewport.
-        const maxOffset = 1 - 1 / nextZoom
+        // In atlas mode, real stars below the horizon fill the new viewport.
+        // Only constrain navigation when the standard visible-sky mode is active.
+        const maxOffset = selected ? 1.75 : 1 - 1 / nextZoom
         const distance = Math.hypot(fx, fy)
         if (distance > maxOffset && distance > 0) {
           fx *= maxOffset / distance
@@ -354,9 +375,10 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     {daytime && <div className="day-warning">☀ Tageszeit gewählt: Lehransicht ohne Sonnenlichtsimulation</div>}
     {!catalog && <div className="loading">Sternkatalog wird geladen …</div>}
     <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: am Mauszeiger zoomen · Ziehen: drehen</div>
+    {selected && <div className="sky-atlas-note">Atlasansicht · Sterne unter dem Horizont eingeblendet</div>}
 
     {selected && <aside ref={infoCardRef} className="info-card glass">
-      <button className="close" onClick={() => { setSelected(null); setFocus(null) }}>×</button>
+      <button className="close" onClick={() => { setSelected(null); setFocus(null); setZoom(1) }}>×</button>
       <p className="eyebrow">{selected.kind === 'star' ? 'STERN' : 'STERNBILD'}</p>
       {selected.kind === 'star' ? <>
         <h2>{STAR_ALIASES[selected.star.name || ''] || selected.star.name}</h2>
