@@ -24,7 +24,7 @@ button { color: inherit; }
 .globe-wrap canvas:active { cursor: grabbing; }
 .globe-aura { position: absolute; left: 50%; top: 53%; width: min(82vw, 110vh); height: min(82vw, 110vh); translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(37,123,196,.21), rgba(37,123,196,.06) 48%, transparent 72%); filter: blur(56px); pointer-events: none; }
 .drag-hint { position: absolute; bottom: 9%; width: 100%; text-align: center; color: #6f7f9f; font-size: 10px; letter-spacing: .08em; pointer-events: none; }
-.location-panel { position: absolute; z-index: 9; top: 50%; left: min(calc(50% + clamp(190px, 11vw, 250px)), calc(100% - min(340px, 29vw) - 16px)); right: auto; width: min(340px, 29vw); translate: 28px -42%; opacity: 0; padding: 24px; border: 1px solid rgba(137, 190, 244, .14); border-radius: 16px; background: rgba(6, 12, 29, .82); box-shadow: 0 30px 80px rgba(0,0,0,.38); backdrop-filter: blur(20px); transition: .6s ease; }
+.location-panel { position: absolute; z-index: 9; top: 50%; left: min(calc(50% + clamp(190px, 11vw, 250px) + 40px), calc(100% - min(340px, 29vw) - 16px)); right: auto; width: min(340px, 29vw); translate: 28px -42%; opacity: 0; padding: 24px; border: 1px solid rgba(137, 190, 244, .14); border-radius: 16px; background: rgba(6, 12, 29, .82); box-shadow: 0 30px 80px rgba(0,0,0,.38); backdrop-filter: blur(20px); transition: .6s ease; }
 .location-panel.visible { translate: 0 -42%; opacity: 1; }
 .panel-head { display: flex; justify-content: space-between; align-items: center; }
 .panel-head p { margin: 0 0 7px; }.panel-head h2 { margin: 0; font: 400 24px Manrope; }
