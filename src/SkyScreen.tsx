@@ -82,9 +82,17 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         canvas.width = width * dpr; canvas.height = height * dpr
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      // Keep the astronomical layer transparent so the subtle decorative backdrop stays separate.
+      // The chart disc stays opaque, keeping decorative nebulae outside the real sky map.
       ctx.clearRect(0, 0, width, height)
       const radius = Math.min(width, height) * .54
+      const chartRadius = radius * zoom
+      const chartBackdrop = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, chartRadius)
+      chartBackdrop.addColorStop(0, '#0a152d')
+      chartBackdrop.addColorStop(1, '#050c1e')
+      ctx.fillStyle = chartBackdrop
+      ctx.beginPath()
+      ctx.arc(width / 2, height / 2, chartRadius, 0, Math.PI * 2)
+      ctx.fill()
       const project = (azimuth: number, altitude: number) => {
         const r = ((90 - altitude) / 90) * radius * zoom
         const a = (azimuth + rotation) * Math.PI / 180
