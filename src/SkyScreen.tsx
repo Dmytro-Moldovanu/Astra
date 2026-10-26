@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatLocal, toHorizontal } from './astronomy'
 import { highlightedStarNames } from './data'
 import { constellationDescriptions } from './constellationDescriptions'
+import { MythicSketch, illustratedConstellationIds, mythicFigures } from './mythicConstellations'
 import type { Constellation, Location, Selection, Star } from './types'
 
 type CatalogData = { stars: Star[]; constellations: Constellation[] }
@@ -58,6 +59,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
   const [showNames, setShowNames] = useState(true)
   const [hovered, setHovered] = useState<Selection>(null)
   const [selected, setSelected] = useState<Selection>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => { loadCatalog().then(setCatalog) }, [])
 
@@ -74,6 +76,24 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     }))
     return { starPoints, linePoints }
   }, [catalog, date, location.lat, location.lng])
+
+  const visibleMythic = useMemo(() => {
+    if (!horizontal) return []
+    return horizontal.linePoints.filter(({ constellation, lines }) =>
+      illustratedConstellationIds.includes(constellation.id) &&
+      lines.some((line) => line.some((pos) => pos.altitude > 0))
+    ).map(({ constellation, lines }) => {
+      const points = lines.flat().filter((pos) => pos.altitude > 0)
+      return { constellation, highest: Math.max(...points.map((p) => p.altitude)) }
+    }).sort((a, b) => b.highest - a.highest)
+  }, [horizontal])
+
+  const openConstellation = (constellation: Constellation) => {
+    setHovered(null)
+    setSelected({ kind: 'constellation', constellation })
+    setSidebarOpen(false)
+    focusOnConstellation(constellation)
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -323,9 +343,9 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         const p = pointer(e)
         const hit = hitTest(p.x, p.y)
         setSelected(hit)
-        if (hit?.kind === 'constellation') focusOnConstellation(hit.constellation)
-        else if (hit?.kind === 'star') focusOnStar(hit.star)
-        else { setFocus(null); setZoom(1) }
+        if (hit?.kind === 'constellation') openConstellation(hit.constellation)
+        else if (hit?.kind === 'star') { setSidebarOpen(false); focusOnStar(hit.star) }
+        else { setFocus(null); setZoom(1); setSidebarOpen(true) }
       }}
       onPointerLeave={() => { dragRef.current = null; setHovered(null) }}
       onWheel={(e) => {
@@ -368,7 +388,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       <i />
       <button onClick={() => onDate(new Date(date.getTime() - 3600000))}>−1h</button>
       <button onClick={() => onDate(new Date(date.getTime() + 3600000))}>+1h</button>
-      <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null) }}>↻ <span>Ansicht zurücksetzen</span></button>
+      <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null); setSidebarOpen(true) }}>↻ <span>Ansicht zurücksetzen</span></button>
     </div>
 
     <div className="observation glass"><span className="live-dot" /><div><strong>{location.name}</strong><small>{formatLocal(date, location.timeZone)}</small></div></div>
@@ -377,8 +397,25 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: am Mauszeiger zoomen · Ziehen: drehen</div>
     {selected && <div className="sky-atlas-note">Atlasansicht · Sterne unter dem Horizont eingeblendet</div>}
 
+    {!selected && <section className={`mythic-panel glass ${sidebarOpen ? '' : 'collapsed'}`} aria-label="Mythologische Sternbilder">
+      <button className="mythic-panel-toggle" onClick={() => setSidebarOpen((open) => !open)}
+        aria-expanded={sidebarOpen}>✧ <span>{sidebarOpen ? 'Sternbilder' : 'Mythologie entdecken'}</span> {sidebarOpen ? '−' : '+'}</button>
+      {sidebarOpen && <>
+        <p className="mythic-panel-subtitle">MYTHEN AM HIMMEL · JETZT SICHTBAR</p>
+        <div className="mythic-panel-list">
+          {visibleMythic.length ? visibleMythic.map(({ constellation }) => <button
+            key={constellation.id} className="mythic-item" onClick={() => openConstellation(constellation)}>
+            <MythicSketch id={constellation.id}/>
+            <span className="mythic-item-text"><strong>{constellation.name}</strong><small>{mythicFigures[constellation.id].caption}</small></span>
+            <span className="mythic-item-arrow">›</span>
+          </button>) : <p className="mythic-empty">Keine illustrierten Sternbilder über dem Horizont.</p>}
+        </div>
+        <p className="mythic-panel-footnote">Schematische Zeichnungen · keine Sternpositionen</p>
+      </>}
+    </section>}
+
     {selected && <aside ref={infoCardRef} className="info-card glass">
-      <button className="close" onClick={() => { setSelected(null); setFocus(null); setZoom(1) }}>×</button>
+      <button className="close" onClick={() => { setSelected(null); setFocus(null); setZoom(1); setSidebarOpen(true) }}>×</button>
       <p className="eyebrow">{selected.kind === 'star' ? 'STERN' : 'STERNBILD'}</p>
       {selected.kind === 'star' ? <>
         <h2>{STAR_ALIASES[selected.star.name || ''] || selected.star.name}</h2>
@@ -387,6 +424,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
       </> : <>
         <h2>{selected.constellation.name}</h2>
         <p className="latin">{selected.constellation.latin}</p>
+        {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large /><span>{mythicFigures[selected.constellation.id].caption}</span></div>}
         <p>{constellationDescriptions[selected.constellation.id] ?? 'Ein Sternbild mit eigener Geschichte am Nachthimmel.'}</p>
         <dl><div><dt>Kürzel</dt><dd>{selected.constellation.id}</dd></div><div><dt>Sichtbare Linien</dt><dd>{selected.constellation.lines.length}</dd></div></dl>
       </>}
