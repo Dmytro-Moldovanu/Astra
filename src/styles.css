@@ -85,3 +85,10 @@ button { color: inherit; }
 @media (max-width: 1250px) { .mythic-panel { width: 238px; right: 10px; } }
 @media (max-width: 900px) { .mythic-panel { top: 66px; bottom: 92px; width: 210px; padding: 9px; } .mythic-sketch { width: 46px; height: 46px; flex-basis: 46px; } }
 @media (max-width: 700px) { .mythic-panel { top: 57px; bottom: auto; max-height: min(55vh, 410px); width: min(260px, 78vw); right: 10px; padding: 8px; } .mythic-panel.collapsed { top: 58px; right: 10px; } .mythic-panel-subtitle { font-size: 8px; } .mythic-detail-art .mythic-sketch.large { width: 62px; height: 62px; flex-basis: 62px; } }
+
+/* Public-domain atlas engravings replace the simplified line-art when installed. */
+.mythic-engraving { width: 57px; height: 57px; flex: 0 0 57px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(145,184,240,.18)); }
+.mythic-engraving.large { width: 78px; height: 78px; flex: 0 0 78px; }
+.mythic-sketch.engraving-fallback { display: none; }
+@media (max-width: 900px) { .mythic-engraving { width: 46px; height: 46px; flex-basis: 46px; } }
+@media (max-width: 700px) { .mythic-engraving.large { width: 62px; height: 62px; flex-basis: 62px; } }
