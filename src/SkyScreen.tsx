@@ -9,6 +9,7 @@ import { translate, placeName, locales, type Language } from './i18n'
 import { translatedConstellations } from './constellationTranslations'
 import { translatedMyths } from './mythTranslations'
 import { translatedCaptions } from './captionTranslations'
+import LanguagePicker from './LanguagePicker'
 
 type CatalogData = { stars: Star[]; constellations: Constellation[] }
 type ScreenPoint = { x: number; y: number; star: Star }
@@ -47,8 +48,8 @@ function distanceToSegment(px: number, py: number, line: ScreenLine) {
   return Math.hypot(px - (line.x1 + t * dx), py - (line.y1 + t * dy))
 }
 
-export default function SkyScreen({ language, location, date, onDate, onBack }: {
-  language: Language; location: Location; date: Date; onDate: (date: Date) => void; onBack: () => void
+export default function SkyScreen({ language, onLanguage, location, date, onDate, onBack }: {
+  language: Language; onLanguage: (language: Language) => void; location: Location; date: Date; onDate: (date: Date) => void; onBack: () => void
 }) {
   const t = translate(language)
   const nameOf = (item: Constellation) => language === 'de' ? item.name : translatedConstellations[language][item.id]?.name || item.latin
@@ -390,6 +391,7 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
       aria-label={t.heroEnd} />
 
     <div className="sky-brand"><span>✦</span> ASTRA <small>{t.atlasName}</small></div>
+    <div className="sky-header-controls">
     <div className="sky-toolbar glass">
       <button onClick={onBack}>← <span>{t.back}</span></button>
       <i />
@@ -399,6 +401,8 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
       <button onClick={() => onDate(new Date(date.getTime() - 3600000))}>−1h</button>
       <button onClick={() => onDate(new Date(date.getTime() + 3600000))}>+1h</button>
       <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null); setSidebarOpen(true) }}>↻ <span>{t.reset}</span></button>
+    </div>
+    <LanguagePicker language={language} onChange={onLanguage} />
     </div>
 
     <div className="observation glass"><span className="live-dot" /><div><strong>{placeName(location.name, language)}</strong><small>{formatLocal(date, location.timeZone, locales[language])}</small></div></div>

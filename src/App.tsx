@@ -4,7 +4,8 @@ import SkyScreen from './SkyScreen'
 import { cities } from './data'
 import { localInputToDate } from './astronomy'
 import type { Location } from './types'
-import { languages, type Language } from './i18n'
+import type { Language } from './i18n'
+import LanguagePicker from './LanguagePicker'
 
 const now = new Date()
 const dateDefault = now.toISOString().slice(0, 10)
@@ -20,10 +21,10 @@ export default function App() {
   const observedAt = useMemo(() => localInputToDate(date, time, location.timeZone), [date, time, location.timeZone])
 
   return <div className={`app screen-${screen}`}>
-    <nav className="language-picker" aria-label="Language / Мова / Sprache">{languages.map((code) => <button key={code} type="button" className={language === code ? 'active' : ''} onClick={() => changeLanguage(code)} aria-label={code === 'de' ? 'Deutsch' : code === 'uk' ? 'Українська' : 'British English'} title={code === 'de' ? 'Deutsch' : code === 'uk' ? 'Українська' : 'English (UK)'} aria-pressed={language === code}>{code === 'de' ? '🇩🇪' : code === 'uk' ? '🇺🇦' : '🇬🇧'}</button>)}</nav>
+    {screen === 'earth' && <LanguagePicker language={language} onChange={changeLanguage} />}
     {screen === 'earth'
       ? <EarthScreen language={language} location={location} date={date} time={time} onLocation={setLocation} onDate={setDate} onTime={setTime} onOpenSky={() => setScreen('sky')} />
-      : <SkyScreen language={language} location={location} date={observedAt} onDate={(next) => {
+      : <SkyScreen language={language} onLanguage={changeLanguage} location={location} date={observedAt} onDate={(next) => {
           const parts = new Intl.DateTimeFormat('en-CA', { timeZone: location.timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(next)
           const v = (type: Intl.DateTimeFormatPartTypes) => parts.find((p) => p.type === type)?.value ?? ''
           setDate(`${v('year')}-${v('month')}-${v('day')}`)

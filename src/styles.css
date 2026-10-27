@@ -106,3 +106,57 @@ button { color: inherit; }
 .language-picker button.active, .language-picker button:hover { background: rgba(120,200,255,.13); border-color: rgba(120,200,255,.4); opacity: 1; }
 @media(max-width: 1150px) { .language-picker { left: auto; right: 14px; top: 62px; } }
 @media(max-width: 700px) { .language-picker { top: 55px; right: 10px; } .language-picker button { font-size: 16px; padding: 4px; } }
+
+/* Place both sky controls in the same flex row, without overlapping frames. */
+.sky-header-controls {
+  position: absolute;
+  z-index: 40;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+.sky-header-controls .sky-toolbar,
+.sky-header-controls .language-picker {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  translate: none;
+  transform: none;
+  flex: 0 0 auto;
+}
+/* On narrow viewports the controls occupy separate rows. */
+@media (max-width: 1250px) {
+  .sky-header-controls { display: contents; }
+  .sky-header-controls .sky-toolbar {
+    position: absolute;
+    top: auto;
+    bottom: 42px;
+    left: 50%;
+    translate: -50% 0;
+  }
+  .sky-header-controls .language-picker {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+@media (max-width: 700px) {
+  .sky-header-controls .sky-toolbar { bottom: 30px; }
+}
+@media (max-width: 520px) {
+  .sky-header-controls .language-picker {
+    top: 52px;
+    left: 10px;
+    translate: none;
+  }
+  .sky-screen .mythic-panel,
+  .sky-screen .mythic-panel.collapsed { top: 98px; }
+  .sky-screen .day-warning { top: 105px; }
+}
