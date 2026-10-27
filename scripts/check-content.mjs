@@ -23,7 +23,7 @@ assert(illustrationIds.length === 25 && unique(illustrationIds), '25 eindeutige 
 assert(mythIds.every((id) => illustrationIds.includes(id)), 'Mythen/Bildzuordnungen stimmen nicht überein')
 
 const files = (await readdir(path.join(root, 'src'))).filter((name) => /\.(?:tsx?|css)$/.test(name))
-const translationFiles = new Set(['i18n.ts', 'constellationTranslations.ts', 'mythTranslations.ts', 'captionTranslations.ts'])
+const translationFiles = new Set(['App.tsx', 'i18n.ts', 'constellationTranslations.ts', 'mythTranslations.ts', 'captionTranslations.ts'])
 for (const name of files) {
   const source = await text('src/' + name)
   if (!translationFiles.has(name)) assert(!/[\u0400-\u052F]/.test(source), 'Unerwartete kyrillische Schrift in src/' + name)
