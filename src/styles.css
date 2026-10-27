@@ -101,7 +101,7 @@ button { color: inherit; }
 @media (max-width: 700px) { .info-card { max-height: calc(100dvh - 180px); } .mythic-story { padding: 12px; } }
 
 /* Shared language switcher: persistent across Earth and Sky without remounting the view. */
-.language-picker { position: fixed; z-index: 40; top: 13px; left: calc(50% + 340px); display: flex; gap: 5px; padding: 5px; border: 1px solid rgba(160,205,255,.16); border-radius: 10px; background: rgba(7,13,31,.82); box-shadow: 0 12px 28px rgba(0,0,0,.26); backdrop-filter: blur(14px); }
+.language-picker { position: fixed; z-index: 40; top: 13px; left: calc(50% + clamp(350px, 22vw, 420px)); display: flex; gap: 5px; padding: 5px; border: 1px solid rgba(160,205,255,.16); border-radius: 10px; background: rgba(7,13,31,.82); box-shadow: 0 12px 28px rgba(0,0,0,.26); backdrop-filter: blur(14px); }
 .language-picker button { appearance: none; cursor: pointer; font-size: 18px; line-height: 1.1; border: 1px solid transparent; border-radius: 6px; padding: 5px 6px; background: transparent; opacity: .62; transition: .2s; }
 .language-picker button.active, .language-picker button:hover { background: rgba(120,200,255,.13); border-color: rgba(120,200,255,.4); opacity: 1; }
 @media(max-width: 1150px) { .language-picker { left: auto; right: 14px; top: 62px; } }
