@@ -29,10 +29,14 @@ Dieses Projekt verwendet verschiedene freie oder öffentlich zugängliche Quelle
 
 ## Hintergrundbilder
 
-- **Startseite / Erde**: `public/earth-background.webp`, Sternenhimmel von **Gerd Altmann (geralt)** auf Pixabay, Bild-ID 7071805.
-- Datei: vom Projektinhaber bereitgestelltes Motiv `geralt-stars-7071805.jpg`, für die Website in WebP umgewandelt. Original-Link konnte hier nicht zuverlässig verifiziert werden.
-- Lizenz: **Pixabay Content License**, https://pixabay.com/service/terms/ ; kostenlose Nutzung im Rahmen der Lizenzbedingungen, keine gesonderte Namensnennung vorgeschrieben. Wir nennen den Urheber dennoch.
-- **Sternkarte**: `public/space-background.jpg` bleibt unverändert. Diese Datei wurde zuvor für die Sternkarte verwendet und ist **nicht** durch die neue Startseiten-Grafik ersetzt worden. Ihre genaue Ursprungslizenz ist weiterhin gesondert zu dokumentieren.
+- **Startseite / Erde**: echte NASA/ESA-Hubble-Aufnahme der Region **N44 (LHA 120-N44)** in der Großen Magellanschen Wolke, 3840 × 2160 Pixel.
+- Offizielle Bildseite: https://esahubble.org/images/potm2608a/
+- Originale 4K-Desktopdatei (extern eingebunden, ohne lokale Qualitätsreduktion): https://cdn.esahubble.org/archives/images/wallpaper_uhd/potm2608a.jpg
+- **Urhebernachweis (vollständig)**: ESA/Hubble & NASA, D. Gouliermis.
+- **Lizenz**: Creative Commons Attribution 4.0 International, https://creativecommons.org/licenses/by/4.0/ ; kostenlose Wiedergabe mit sichtbarer Quellenangabe. Die Quellenangabe ist auf der Startseite als Link eingeblendet.
+- **Gestaltung**: Das Foto bleibt in seiner ursprünglichen Bildauflösung erhalten; lediglich die Anzeige wird per CSS dezent abgedunkelt und in die Bildschirmfläche eingepasst. Es wurden keine künstlichen Sternpunkte ergänzt.
+- **Technischer Hinweis**: Die Startseite lädt das Bild vom offiziellen ESA/Hubble-CDN. Dafür ist beim Besuch eine Internetverbindung erforderlich. Das alte lokale Hintergrundbild `public/earth-background.webp` wurde entfernt.
+- **Sternkarte**: `public/space-background.jpg` bleibt **unverändert**. Ihre genaue Ursprungslizenz ist weiterhin gesondert zu dokumentieren.
 
 ## Astronomische Berechnungen
 
