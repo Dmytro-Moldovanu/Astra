@@ -88,7 +88,7 @@ public/
   earth-day.jpg              Tagestextur
   earth-night.png            Nachttextur
   earth-bump.png             Höhenkarte
-  earth-background.webp       Pixabay-Sternenfeld, nur Startseite (Erde)
+  # Startseitenfoto N44 wird extern vom offiziellen ESA/Hubble-CDN geladen
   space-background.jpg       Bisheriger Hintergrund der Sternkarte
 scripts/
   check-content.mjs          Prüft Sternbilder, Texte, Bilder und Schriftsysteme
@@ -99,6 +99,7 @@ scripts/
 - **Astronomische Katalogdaten:** D3-Celestial, Olaf Frohn – BSD-3-Clause; Lizenzkopie unter `public/data/D3-CELESTIAL-LICENSE.txt`.
 - **Sternbildillustrationen:** Johan Meuris, bereitgestellt durch Stellarium – **Free Art License 1.3**. Die Zeichnungen stehen ausdrücklich nicht unter Public Domain. [Quelle](https://github.com/Stellarium/stellarium-skycultures/tree/master/western) · [Lizenz](https://artlibre.org/licence/lal/en/).
 - **Erdtexturen:** Three.js / three-globe-Beispieldateien; Ursprungs- und Lizenzhinweise siehe [Quellen und Lizenzen](docs/QUELLEN_UND_LIZENZEN.md).
+- **Startseiten-Hintergrund:** [NASA/ESA-Hubble-Aufnahme N44](https://esahubble.org/images/potm2608a/), UHD 3840 × 2160, via offiziellem ESA/Hubble-CDN, **CC BY 4.0**, Bildnachweis: ESA/Hubble & NASA, D. Gouliermis. Die Sternkarte ist davon unabhängig.
 - **Mythologische Texte:** Kurze Nacherzählungen verschiedener Überlieferungen. Varianten werden ausdrücklich als solche beschrieben.
 
 ## Hinweise und Grenzen
