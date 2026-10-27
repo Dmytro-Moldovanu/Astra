@@ -23,9 +23,10 @@ assert(illustrationIds.length === 25 && unique(illustrationIds), '25 eindeutige 
 assert(mythIds.every((id) => illustrationIds.includes(id)), 'Mythen/Bildzuordnungen stimmen nicht überein')
 
 const files = (await readdir(path.join(root, 'src'))).filter((name) => /\.(?:tsx?|css)$/.test(name))
+const translationFiles = new Set(['i18n.ts', 'constellationTranslations.ts', 'mythTranslations.ts', 'captionTranslations.ts'])
 for (const name of files) {
   const source = await text('src/' + name)
-  assert(!/[\u0400-\u052F]/.test(source), 'Unerwartete kyrillische Schrift in src/' + name)
+  if (!translationFiles.has(name)) assert(!/[\u0400-\u052F]/.test(source), 'Unerwartete kyrillische Schrift in src/' + name)
 }
 async function asset(file, signature, offset = 0) {
   try {
@@ -41,4 +42,4 @@ await asset('earth-night.png', [0x89, 0x50, 0x4e, 0x47])
 await asset('earth-bump.png', [0x89, 0x50, 0x4e, 0x47])
 await asset('space-background.jpg', [0xff, 0xd8])
 if (process.exitCode) process.exit(process.exitCode)
-console.log('OK: 88 Sternbildtexte, 25 Mythen, 25 Illustrationen, Erd- und Weltraumtexturen, deutschsprachiger Quelltext.')
+console.log('OK: 88 Sternbildtexte, 25 Mythen, 25 Illustrationen, Erd- und Weltraumtexturen, dreisprachiger Quelltext.')
