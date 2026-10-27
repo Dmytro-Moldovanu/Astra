@@ -88,7 +88,7 @@ public/
   earth-day.jpg              Tagestextur
   earth-night.png            Nachttextur
   earth-bump.png             Höhenkarte
-  earth-background.jpg       Pixabay-Sternenfeld, nur Startseite (Erde)
+  earth-background.webp       Pixabay-Sternenfeld, nur Startseite (Erde)
   space-background.jpg       Bisheriger Hintergrund der Sternkarte
 scripts/
   check-content.mjs          Prüft Sternbilder, Texte, Bilder und Schriftsysteme

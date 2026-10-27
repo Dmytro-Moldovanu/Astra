@@ -29,8 +29,8 @@ Dieses Projekt verwendet verschiedene freie oder öffentlich zugängliche Quelle
 
 ## Hintergrundbilder
 
-- **Startseite / Erde**: `public/earth-background.jpg`, Sternenhimmel von **Gerd Altmann (geralt)** auf Pixabay, Bild-ID 7071805.
-- Original: https://pixabay.com/photos/stars-space-space-wallpaper-galaxy-7071805/
+- **Startseite / Erde**: `public/earth-background.webp`, Sternenhimmel von **Gerd Altmann (geralt)** auf Pixabay, Bild-ID 7071805.
+- Datei: vom Projektinhaber bereitgestelltes Motiv `geralt-stars-7071805.jpg`, für die Website in WebP umgewandelt. Original-Link konnte hier nicht zuverlässig verifiziert werden.
 - Lizenz: **Pixabay Content License**, https://pixabay.com/service/terms/ ; kostenlose Nutzung im Rahmen der Lizenzbedingungen, keine gesonderte Namensnennung vorgeschrieben. Wir nennen den Urheber dennoch.
 - **Sternkarte**: `public/space-background.jpg` bleibt unverändert. Diese Datei wurde zuvor für die Sternkarte verwendet und ist **nicht** durch die neue Startseiten-Grafik ersetzt worden. Ihre genaue Ursprungslizenz ist weiterhin gesondert zu dokumentieren.
 
