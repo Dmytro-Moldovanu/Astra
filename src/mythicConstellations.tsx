@@ -1,3 +1,5 @@
+import type { Language } from './i18n'
+import { translatedCaptions } from './captionTranslations'
 /** Illustrationen: Johan Meuris / Stellarium, Free Art License 1.3.
  * https://github.com/Stellarium/stellarium-skycultures/tree/master/western
  * https://artlibre.org/licence/lal/en/
@@ -82,14 +84,14 @@ export const mythicFigures: Record<string, { caption: string }> = {
 
 export const illustratedConstellationIds = Object.keys(mythicFigures)
 
-export function MythicSketch({ id, large = false }: { id: string; large?: boolean }) {
+export function MythicSketch({ id, large = false, language = 'de' }: { id: string; large?: boolean; language?: Language }) {
   const figure = mythicFigures[id]
   if (!figure) return null
   return (
     <img
       className={large ? 'mythic-engraving large' : 'mythic-engraving'}
       src={`./constellation-art/${id}.webp`}
-      alt={figure.caption}
+      alt={language === 'de' ? figure.caption : translatedCaptions[language][id] || figure.caption}
       loading="lazy"
       decoding="async"
     />

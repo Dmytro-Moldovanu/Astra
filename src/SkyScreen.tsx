@@ -415,7 +415,7 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
         <div className="mythic-panel-list">
           {visibleMythic.length ? visibleMythic.map(({ constellation }) => <button
             key={constellation.id} className="mythic-item" onClick={() => openConstellation(constellation)}>
-            <MythicSketch id={constellation.id}/>
+            <MythicSketch id={constellation.id} language={language}/>
             <span className="mythic-item-text"><strong>{nameOf(constellation)}</strong><small>{captionOf(constellation.id)}</small></span>
             <span className="mythic-item-arrow">›</span>
           </button>) : <p className="mythic-empty">{t.empty}</p>}
@@ -434,7 +434,7 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
       </> : <>
         <h2>{nameOf(selected.constellation)}</h2>
         <p className="latin">{selected.constellation.latin}</p>
-        {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large /><span>{captionOf(selected.constellation.id)}</span></div>}
+        {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large language={language} /><span>{captionOf(selected.constellation.id)}</span></div>}
         <p>{descriptionOf(selected.constellation) ?? t.defaultDesc}</p>
         {mythOf(selected.constellation) && <section className="mythic-story" aria-label={t.mythology}>
           <h3>{t.mythology}</h3>
