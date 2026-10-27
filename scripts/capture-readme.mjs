@@ -48,7 +48,12 @@ try {
   await page.getByRole('button', { name: 'Augsburg', exact: true }).click()
   await page.locator('input[type="date"]').fill('2026-05-14')
   await page.locator('input[type="time"]').fill('14:00')
-  await settle(5500)
+  await settle(3000)
+  // Zoom out in the real application, so the globe does not obscure
+  // the page heading in a portfolio-width screenshot.
+  await page.mouse.move(920, 560)
+  await page.mouse.wheel(0, 620)
+  await settle(2500)
   await screenshot('01-startseite.webp')
 
   await page.getByRole('button', { name: /Sternenhimmel anzeigen/ }).click()

@@ -15,7 +15,7 @@ Dieses Projekt verwendet verschiedene freie oder öffentlich zugängliche Quelle
 - Quelle: https://github.com/Stellarium/stellarium-skycultures/tree/master/western
 - Beschreibung mit Lizenzhinweis: https://github.com/Stellarium/stellarium-skycultures/blob/master/western/description.md
 - Lizenz: **Free Art License 1.3 (Licence Art Libre)**, https://artlibre.org/licence/lal/en/
-- Die 25 Illustrationen liegen nach `npm run assets` als WebP-Dateien unter `public/constellation-art/`.
+- Die 25 unveränderten Originalillustrationen liegen als WebP-Dateien unter `public/constellation-art/`. Ein gesonderter Bilddownload ist nicht erforderlich.
 - Rechtehinweis und Link zur Lizenz erscheinen ebenfalls **unterhalb der Sternbildliste**.
 - Die Illustrationen stellen Sternbilder künstlerisch dar; ihre Konturen sind keine Projektion der Kataloglinien.
 - Bei einer Weitergabe oder Bearbeitung der Bilder müssen die Bedingungen der Free Art License eingehalten werden.
@@ -25,7 +25,7 @@ Dieses Projekt verwendet verschiedene freie oder öffentlich zugängliche Quelle
 - Tagtextur: https://github.com/mrdoob/three.js/blob/master/examples/textures/planets/earth_atmos_2048.jpg
 - Nachtbeleuchtung: https://github.com/mrdoob/three.js/blob/master/examples/textures/planets/earth_lights_2048.png
 - Höhentextur: https://github.com/vasturiano/three-globe/blob/master/example/img/earth-topology.png
-- Diese Dateien werden über `scripts/prepare-assets.mjs` heruntergeladen und lokal verwendet. Die genaue Rechtekette der Originalbilder sollte vor einer öffentlichen Weiterverbreitung noch einmal anhand der Quelldateien überprüft werden.
+- Diese Dateien liegen bereits lokal im Verzeichnis `public/`. Ein zusätzliches Asset-Skript wird nicht benötigt. Die genaue Rechtekette der Originalbilder sollte vor einer öffentlichen Weiterverbreitung anhand der Quelldateien geprüft werden.
 
 ## Hintergrundbild
 
