@@ -48,12 +48,14 @@ try {
   await page.getByRole('button', { name: 'Augsburg', exact: true }).click()
   await page.locator('input[type="date"]').fill('2026-05-14')
   await page.locator('input[type="time"]').fill('14:00')
+  // Release the text cursor and native selection highlight before capture.
+  await page.locator('input[type="time"]').evaluate((element) => element.blur())
+  await settle(3500)
+  // Genuine browser interaction: a wider, better balanced Earth overview.
+  await page.mouse.move(880, 510)
+  await page.mouse.wheel(0, 980)
+  await page.mouse.move(1740, 950)
   await settle(3000)
-  // Zoom out in the real application, so the globe does not obscure
-  // the page heading in a portfolio-width screenshot.
-  await page.mouse.move(920, 560)
-  await page.mouse.wheel(0, 620)
-  await settle(2500)
   await screenshot('01-startseite.webp')
 
   await page.getByRole('button', { name: /Sternenhimmel anzeigen/ }).click()
@@ -61,11 +63,12 @@ try {
   await settle(2200)
   await screenshot('02-sternenhimmel.webp')
 
-  // Little Bear is visible all year from Augsburg and has a full mythology card.
-  const constellation = page.locator('.mythic-item').filter({ hasText: 'Kleiner Bär' }).first()
-  if (await constellation.count()) {
+  // Orion is distinctive and offers an attractive figure with its own legend.
+  const constellation = page.locator('.mythic-item').filter({ hasText: /^Orion/ }).first()
+  if (await constellation.isVisible()) {
     await constellation.click()
   } else {
+    // Reliable fallback when the reference sky setup changes.
     await page.locator('.mythic-item').first().click()
   }
   await page.locator('.info-card .mythic-story').waitFor({ state: 'visible', timeout: 20000 })
