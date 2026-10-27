@@ -38,8 +38,6 @@ jobs:
         run: npm run check:content
 
       - name: Build ASTRA for GitHub Pages
-        env:
-          ASTRA_PAGES: '1'
         run: npm run build
 
       - name: Configure GitHub Pages
