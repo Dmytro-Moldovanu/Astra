@@ -27,10 +27,12 @@ Dieses Projekt verwendet verschiedene freie oder öffentlich zugängliche Quelle
 - Höhentextur: https://github.com/vasturiano/three-globe/blob/master/example/img/earth-topology.png
 - Diese Dateien liegen bereits lokal im Verzeichnis `public/`. Ein zusätzliches Asset-Skript wird nicht benötigt. Die genaue Rechtekette der Originalbilder sollte vor einer öffentlichen Weiterverbreitung anhand der Quelldateien geprüft werden.
 
-## Hintergrundbild
+## Hintergrundbilder
 
-- `public/space-background.jpg` wurde aus dem vorherigen Projektstand übernommen.
-- **Die konkrete Originalquelle/Lizenz ist nicht zweifelsfrei dokumentiert.** Vor Veröffentlichung als eigenständig verbreitetes Projekt die Herkunft klären oder die Datei durch ein zweifelsfrei frei nutzbares Motiv ersetzen.
+- **Startseite / Erde**: `public/earth-background.jpg`, Sternenhimmel von **Gerd Altmann (geralt)** auf Pixabay, Bild-ID 7071805.
+- Original: https://pixabay.com/photos/stars-space-space-wallpaper-galaxy-7071805/
+- Lizenz: **Pixabay Content License**, https://pixabay.com/service/terms/ ; kostenlose Nutzung im Rahmen der Lizenzbedingungen, keine gesonderte Namensnennung vorgeschrieben. Wir nennen den Urheber dennoch.
+- **Sternkarte**: `public/space-background.jpg` bleibt unverändert. Diese Datei wurde zuvor für die Sternkarte verwendet und ist **nicht** durch die neue Startseiten-Grafik ersetzt worden. Ihre genaue Ursprungslizenz ist weiterhin gesondert zu dokumentieren.
 
 ## Astronomische Berechnungen
 
