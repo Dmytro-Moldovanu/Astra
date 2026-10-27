@@ -218,8 +218,8 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
             const b = project(line[i].azimuth, line[i].altitude)
             const active = selected?.kind === 'constellation' && selected.constellation.id === constellation.id
             const hover = hovered?.kind === 'constellation' && hovered.constellation.id === constellation.id
-            ctx.strokeStyle = active ? 'rgba(151,117,250,.92)' : hover ? 'rgba(120,200,255,.72)' : 'rgba(120,200,255,.14)'
-            ctx.lineWidth = active ? 2 : hover ? 1.6 : .8
+            ctx.strokeStyle = active ? 'rgba(151,117,250,1)' : hover ? 'rgba(120,200,255,.936)' : 'rgba(120,200,255,.182)'
+            ctx.lineWidth = active ? 2.6 : hover ? 2.08 : 1.04
             ctx.globalAlpha = belowHorizon ? atlasOpacity * .7 : 1
             ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke()
             ctx.globalAlpha = 1
