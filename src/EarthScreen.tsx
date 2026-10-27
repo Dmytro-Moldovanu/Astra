@@ -108,6 +108,7 @@ export default function EarthScreen(props: Props) {
 
   return <main className="earth-screen" ref={screenRef}>
     <div className="earth-background" aria-hidden="true" />
+    <a className="earth-image-credit" href="https://esahubble.org/images/potm2608a/" target="_blank" rel="noopener noreferrer" aria-label="Bildquelle: ESA/Hubble & NASA, D. Gouliermis, CC BY 4.0">ESA/Hubble &amp; NASA, D. Gouliermis · CC BY 4.0</a>
     <div className="brand"><span className="brand-mark">✦</span> ASTRA</div>
     <header className="hero-copy">
       <p className="eyebrow">{t.heroEyebrow}</p>
