@@ -5,8 +5,10 @@ import { cities } from './data'
 import { localInputToDate } from './astronomy'
 import { useEarthLighting } from './earthLighting'
 import type { Location } from './types'
+import { translate, placeName, type Language } from './i18n'
 
 type Props = {
+  language: Language
   location: Location
   date: string
   time: string
@@ -17,6 +19,7 @@ type Props = {
 }
 
 export default function EarthScreen(props: Props) {
+  const t = translate(props.language)
   const globeRef = useRef<any>(null)
   const screenRef = useRef<HTMLElement | null>(null)
   const parallaxFrame = useRef<number | null>(null)
@@ -107,12 +110,12 @@ export default function EarthScreen(props: Props) {
     <div className="earth-background" aria-hidden="true" />
     <div className="brand"><span className="brand-mark">✦</span> ASTRA</div>
     <header className="hero-copy">
-      <p className="eyebrow">INTERAKTIVER STERNENATLAS</p>
-      <h1>Entdecke den <span>Sternenhimmel</span></h1>
-      <p>Wähle deinen Beobachtungsort und entdecke die Sterne über dir.</p>
+      <p className="eyebrow">{t.heroEyebrow}</p>
+      <h1>{t.heroStart} <span>{t.heroEnd}</span></h1>
+      <p>{t.heroLead}</p>
     </header>
 
-    <div className="globe-wrap" aria-label="Interaktive Erde zur Ortsauswahl">
+    <div className="globe-wrap" aria-label="{t.place}">
       <div className="globe-aura" />
       <Globe
         ref={globeRef}
@@ -129,33 +132,33 @@ export default function EarthScreen(props: Props) {
         ringMaxRadius={5} ringPropagationSpeed={2} ringRepeatPeriod={900}
         onGlobeClick={({ lat, lng }) => {
           const timeZone = tzLookup(lat, lng)
-          choose({ name: 'Gewählter Ort', lat, lng, timeZone })
+          choose({ name: t.chosen, lat, lng, timeZone })
         }}
       />
-      <div className="drag-hint">↔ Ziehen zum Drehen · Scrollen zum Zoomen</div>
+      <div className="drag-hint">{t.globeHint}</div>
     </div>
 
     <aside className={`location-panel ${selected ? 'visible' : ''}`}>
       <div className="panel-head">
-        <div><p className="eyebrow">BEOBACHTUNGSORT</p><h2>{props.location.name}</h2></div>
+        <div><p className="eyebrow">{t.place}</p><h2>{placeName(props.location.name, props.language)}</h2></div>
         <span className="live-dot" />
       </div>
       <div className="coordinates">
-        <div><small>BREITENGRAD</small><strong>{Math.abs(props.location.lat).toFixed(4)}° {props.location.lat >= 0 ? 'N' : 'S'}</strong></div>
-        <div><small>LÄNGENGRAD</small><strong>{Math.abs(props.location.lng).toFixed(4)}° {props.location.lng >= 0 ? 'O' : 'W'}</strong></div>
+        <div><small>{t.latitude}</small><strong>{Math.abs(props.location.lat).toFixed(4)}° {props.location.lat >= 0 ? 'N' : 'S'}</strong></div>
+        <div><small>{t.longitude}</small><strong>{Math.abs(props.location.lng).toFixed(4)}° {props.location.lng >= 0 ? 'O' : 'W'}</strong></div>
       </div>
       <div className="quick-cities">
-        <small>SCHNELLAUSWAHL</small>
-        <div>{cities.map((city) => <button key={city.name} className={city.name === props.location.name ? 'active' : ''} onClick={() => choose(city)}>{city.name}</button>)}</div>
+        <small>{t.quick}</small>
+        <div>{cities.map((city) => <button key={city.name} className={city.name === props.location.name ? 'active' : ''} onClick={() => choose(city)}>{placeName(city.name, props.language)}</button>)}</div>
       </div>
       <div className="date-time">
-        <label>Datum<input type="date" value={props.date} onChange={(e) => props.onDate(e.target.value)} /></label>
-        <label>Uhrzeit<input type="time" value={props.time} onChange={(e) => props.onTime(e.target.value)} /></label>
+        <label>{t.date}<input type="date" value={props.date} onChange={(e) => props.onDate(e.target.value)} /></label>
+        <label>{t.time}<input type="time" value={props.time} onChange={(e) => props.onTime(e.target.value)} /></label>
       </div>
       <div className="timezone">◷ {props.location.timeZone}</div>
-      <button className="primary-button" onClick={props.onOpenSky}>Sternenhimmel anzeigen <span>→</span></button>
+      <button className="primary-button" onClick={props.onOpenSky}>{t.openSky} <span>→</span></button>
     </aside>
 
-    <footer className="earth-footer"><span>ECHTE ASTRONOMISCHE DATEN</span><span>·</span><span>POSITION & ZEIT WÄHLBAR</span></footer>
+    <footer className="earth-footer"><span>{t.footOne}</span><span>·</span><span>{t.footTwo}</span></footer>
   </main>
 }

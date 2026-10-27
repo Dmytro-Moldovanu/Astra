@@ -33,8 +33,8 @@ export function localInputToDate(date: string, time: string, timeZone: string): 
   return new Date(guess)
 }
 
-export function formatLocal(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat('de-DE', {
+export function formatLocal(date: Date, timeZone: string, locale = 'de-DE') {
+  return new Intl.DateTimeFormat(locale, {
     timeZone,
     weekday: 'short', day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',

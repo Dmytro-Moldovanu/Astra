@@ -5,6 +5,10 @@ import { constellationDescriptions } from './constellationDescriptions'
 import { constellationMyths } from './constellationMyths'
 import { MythicSketch, illustratedConstellationIds, mythicFigures } from './mythicConstellations'
 import type { Constellation, Location, Selection, Star } from './types'
+import { translate, placeName, locales, type Language } from './i18n'
+import { translatedConstellations } from './constellationTranslations'
+import { translatedMyths } from './mythTranslations'
+import { translatedCaptions } from './captionTranslations'
 
 type CatalogData = { stars: Star[]; constellations: Constellation[] }
 type ScreenPoint = { x: number; y: number; star: Star }
@@ -43,9 +47,14 @@ function distanceToSegment(px: number, py: number, line: ScreenLine) {
   return Math.hypot(px - (line.x1 + t * dx), py - (line.y1 + t * dy))
 }
 
-export default function SkyScreen({ location, date, onDate, onBack }: {
-  location: Location; date: Date; onDate: (date: Date) => void; onBack: () => void
+export default function SkyScreen({ language, location, date, onDate, onBack }: {
+  language: Language; location: Location; date: Date; onDate: (date: Date) => void; onBack: () => void
 }) {
+  const t = translate(language)
+  const nameOf = (item: Constellation) => language === 'de' ? item.name : translatedConstellations[language][item.id]?.name || item.latin
+  const descriptionOf = (item: Constellation) => language === 'de' ? constellationDescriptions[item.id] : translatedConstellations[language][item.id]?.description
+  const mythOf = (item: Constellation) => language === 'de' ? constellationMyths[item.id] : translatedMyths[language][item.id]
+  const captionOf = (id: string) => language === 'de' ? mythicFigures[id]?.caption : translatedCaptions[language][id]
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const infoCardRef = useRef<HTMLElement>(null)
   const hitRef = useRef<{ stars: ScreenPoint[]; lines: ScreenLine[] }>({ stars: [], lines: [] })
@@ -215,7 +224,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
           const p = project(center.azimuth, center.altitude)
           ctx.globalAlpha = center.altitude < 0 ? atlasOpacity * .8 : 1
           ctx.textAlign = 'center'; ctx.fillStyle = isActive ? '#c9baff' : '#9ddaff'; ctx.font = '600 13px Inter, sans-serif'
-          ctx.fillText(constellation.name, p.x, p.y); ctx.textAlign = 'left'
+          ctx.fillText(nameOf(constellation), p.x, p.y); ctx.textAlign = 'left'
           ctx.globalAlpha = 1
         }
       })
@@ -277,7 +286,7 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
     }
     frame = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(frame)
-  }, [horizontal, rotation, zoom, focus, showLines, showNames, hovered, selected])
+  }, [horizontal, rotation, zoom, focus, showLines, showNames, hovered, selected, language])
 
   const hitTest = (x: number, y: number): Selection => {
     const canvas = canvasRef.current
@@ -378,63 +387,63 @@ export default function SkyScreen({ location, date, onDate, onBack }: {
         setFocus({ x: fx * Math.cos(a) + fy * Math.sin(a), y: -fx * Math.sin(a) + fy * Math.cos(a) })
         setZoom(nextZoom)
       }}
-      aria-label="Interaktiver Sternenhimmel" />
+      aria-label={t.heroEnd} />
 
-    <div className="sky-brand"><span>✦</span> ASTRA <small>STERNENATLAS</small></div>
+    <div className="sky-brand"><span>✦</span> ASTRA <small>{t.atlasName}</small></div>
     <div className="sky-toolbar glass">
-      <button onClick={onBack}>← <span>Zurück zur Erde</span></button>
+      <button onClick={onBack}>← <span>{t.back}</span></button>
       <i />
-      <button className={showLines ? 'active' : ''} onClick={() => setShowLines(!showLines)}>⌁ <span>Sternbilder</span></button>
-      <button className={showNames ? 'active' : ''} onClick={() => setShowNames(!showNames)}>Aa <span>Sternnamen</span></button>
+      <button className={showLines ? 'active' : ''} onClick={() => setShowLines(!showLines)}>⌁ <span>{t.lines}</span></button>
+      <button className={showNames ? 'active' : ''} onClick={() => setShowNames(!showNames)}>Aa <span>{t.starNames}</span></button>
       <i />
       <button onClick={() => onDate(new Date(date.getTime() - 3600000))}>−1h</button>
       <button onClick={() => onDate(new Date(date.getTime() + 3600000))}>+1h</button>
-      <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null); setSidebarOpen(true) }}>↻ <span>Ansicht zurücksetzen</span></button>
+      <button onClick={() => { setRotation(0); setZoom(1); setFocus(null); setSelected(null); setSidebarOpen(true) }}>↻ <span>{t.reset}</span></button>
     </div>
 
-    <div className="observation glass"><span className="live-dot" /><div><strong>{location.name}</strong><small>{formatLocal(date, location.timeZone)}</small></div></div>
-    {daytime && <div className="day-warning">☀ Tageszeit gewählt: Lehransicht ohne Sonnenlichtsimulation</div>}
-    {!catalog && <div className="loading">Sternkatalog wird geladen …</div>}
-    <div className="sky-hint">Sternbild anklicken: zentrieren · Scrollen: am Mauszeiger zoomen · Ziehen: drehen</div>
-    {selected && <div className="sky-atlas-note">Atlasansicht · Sterne unter dem Horizont eingeblendet</div>}
+    <div className="observation glass"><span className="live-dot" /><div><strong>{placeName(location.name, language)}</strong><small>{formatLocal(date, location.timeZone, locales[language])}</small></div></div>
+    {daytime && <div className="day-warning">{t.day}</div>}
+    {!catalog && <div className="loading">{t.loading}</div>}
+    <div className="sky-hint">{t.skyHint}</div>
+    {selected && <div className="sky-atlas-note">{t.atlas}</div>}
 
-    {!selected && <section className={`mythic-panel glass ${sidebarOpen ? '' : 'collapsed'}`} aria-label="Mythologische Sternbilder">
+    {!selected && <section className={`mythic-panel glass ${sidebarOpen ? '' : 'collapsed'}`} aria-label={t.discover}>
       <button className="mythic-panel-toggle" onClick={() => setSidebarOpen((open) => !open)}
-        aria-expanded={sidebarOpen}>✧ <span>{sidebarOpen ? 'Sternbilder' : 'Mythologie entdecken'}</span> {sidebarOpen ? '−' : '+'}</button>
+        aria-expanded={sidebarOpen}>✧ <span>{sidebarOpen ? t.panel : t.discover}</span> {sidebarOpen ? '−' : '+'}</button>
       {sidebarOpen && <>
-        <p className="mythic-panel-subtitle">MYTHEN AM HIMMEL · JETZT SICHTBAR</p>
+        <p className="mythic-panel-subtitle">{t.panelSubtitle}</p>
         <div className="mythic-panel-list">
           {visibleMythic.length ? visibleMythic.map(({ constellation }) => <button
             key={constellation.id} className="mythic-item" onClick={() => openConstellation(constellation)}>
             <MythicSketch id={constellation.id}/>
-            <span className="mythic-item-text"><strong>{constellation.name}</strong><small>{mythicFigures[constellation.id].caption}</small></span>
+            <span className="mythic-item-text"><strong>{nameOf(constellation)}</strong><small>{captionOf(constellation.id)}</small></span>
             <span className="mythic-item-arrow">›</span>
-          </button>) : <p className="mythic-empty">Keine illustrierten Sternbilder über dem Horizont.</p>}
+          </button>) : <p className="mythic-empty">{t.empty}</p>}
         </div>
-        <p className="mythic-panel-footnote">Illustrationen: <a href="https://github.com/Stellarium/stellarium-skycultures/tree/master/western" target="_blank" rel="noopener noreferrer">Johan Meuris / Stellarium</a> · <a href="https://artlibre.org/licence/lal/en/" target="_blank" rel="noopener noreferrer">Free Art License 1.3</a></p>
+        <p className="mythic-panel-footnote">{t.illustrations}: <a href="https://github.com/Stellarium/stellarium-skycultures/tree/master/western" target="_blank" rel="noopener noreferrer">Johan Meuris / Stellarium</a> · <a href="https://artlibre.org/licence/lal/en/" target="_blank" rel="noopener noreferrer">Free Art License 1.3</a></p>
       </>}
     </section>}
 
     {selected && <aside ref={infoCardRef} className="info-card glass">
       <button className="close" onClick={() => { setSelected(null); setFocus(null); setZoom(1); setSidebarOpen(true) }}>×</button>
-      <p className="eyebrow">{selected.kind === 'star' ? 'STERN' : 'STERNBILD'}</p>
+      <p className="eyebrow">{selected.kind === 'star' ? t.star : t.constellation}</p>
       {selected.kind === 'star' ? <>
         <h2>{STAR_ALIASES[selected.star.name || ''] || selected.star.name}</h2>
-        <p>Ein markanter Stern im sichtbaren Sternenhimmel.</p>
-        <dl><div><dt>Scheinbare Helligkeit</dt><dd>{selected.star.mag.toFixed(2)} mag</dd></div><div><dt>Rektaszension</dt><dd>{(((selected.star.ra + 360) % 360) / 15).toFixed(2)} h</dd></div><div><dt>Deklination</dt><dd>{selected.star.dec.toFixed(2)}°</dd></div></dl>
+        <p>{t.starDesc}</p>
+        <dl><div><dt>{t.brightness}</dt><dd>{selected.star.mag.toFixed(2)} mag</dd></div><div><dt>{t.rightAscension}</dt><dd>{(((selected.star.ra + 360) % 360) / 15).toFixed(2)} h</dd></div><div><dt>{t.declination}</dt><dd>{selected.star.dec.toFixed(2)}°</dd></div></dl>
       </> : <>
-        <h2>{selected.constellation.name}</h2>
+        <h2>{nameOf(selected.constellation)}</h2>
         <p className="latin">{selected.constellation.latin}</p>
-        {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large /><span>{mythicFigures[selected.constellation.id].caption}</span></div>}
-        <p>{constellationDescriptions[selected.constellation.id] ?? 'Ein Sternbild mit eigener Geschichte am Nachthimmel.'}</p>
-        {constellationMyths[selected.constellation.id] && <section className="mythic-story" aria-label="Mythologie">
-          <h3>Mythologie</h3>
-          <p>{constellationMyths[selected.constellation.id]}</p>
+        {mythicFigures[selected.constellation.id] && <div className="mythic-detail-art"><MythicSketch id={selected.constellation.id} large /><span>{captionOf(selected.constellation.id)}</span></div>}
+        <p>{descriptionOf(selected.constellation) ?? t.defaultDesc}</p>
+        {mythOf(selected.constellation) && <section className="mythic-story" aria-label={t.mythology}>
+          <h3>{t.mythology}</h3>
+          <p>{mythOf(selected.constellation)}</p>
         </section>}
-        <dl><div><dt>Kürzel</dt><dd>{selected.constellation.id}</dd></div><div><dt>Sichtbare Linien</dt><dd>{selected.constellation.lines.length}</dd></div></dl>
+        <dl><div><dt>{t.abbreviation}</dt><dd>{selected.constellation.id}</dd></div><div><dt>{t.visibleLines}</dt><dd>{selected.constellation.lines.length}</dd></div></dl>
       </>}
     </aside>}
 
-    <div className="data-credit">Stern- und Sternbilddaten: D3-Celestial · © Olaf Frohn · BSD-3-Clause</div>
+    <div className="data-credit">{t.dataCredit}: D3-Celestial · © Olaf Frohn · BSD-3-Clause</div>
   </main>
 }
