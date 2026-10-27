@@ -10,6 +10,8 @@ React · TypeScript · Vite · Three.js · Astronomy Engine · D3-Celestial
 
 </div>
 
+**[Live-Demo](https://dmytro-moldovanu.github.io/Astra/)** · **[GitHub-Repository](https://github.com/Dmytro-Moldovanu/Astra)**
+
 ## Projektüberblick
 
 **ASTRA** ist eine interaktive Webanwendung zur Erkundung des Sternenhimmels. Auf einem drehbaren 3D-Globus lässt sich ein Beobachtungsort auswählen. Aus dessen geografischen Koordinaten und der gewählten Zeit wird eine lokale Sternkarte berechnet. Die Anwendung verbindet eine astronomische Visualisierung mit einer leicht zugänglichen Einführung in Sternbilder und die Geschichten hinter ihren Namen.
