@@ -27,15 +27,31 @@ Die Darstellung läuft im Browser. Es ist kein Benutzerkonto und kein eigener Ba
 - **Wissen und Mythologie:** **88** kurze Sternbildbeschreibungen; für die **25** illustrierten Figuren zusätzlich kurze traditionelle Mythen und Hintergrundgeschichten.
 - **Zeitnavigation:** Beobachtungszeit in Stundenschritten verschieben; Sternnamen und Verbindungslinien ein- oder ausblenden.
 
-## Einblicke
+## Rundgang durch ASTRA
 
-| Die Erde | Die Sternkarte |
-|:--:|:--:|
-| ![3D-Globus](docs/screenshots/01-startseite.webp) | ![Sternenhimmel und Auswahl](docs/screenshots/02-sternenhimmel.webp) |
+### 01 · Erde – Beobachtungsort und Zeitpunkt auswählen
 
-### Details zu einem Sternbild
+![ASTRA – interaktiver Erdglobus mit ausgewähltem Beobachtungsort Augsburg](docs/screenshots/01-startseite.webp)
 
-![Sternbild mit Illustration und Mythologie](docs/screenshots/03-sternbild-und-mythologie.webp)
+Der Einstieg beginnt auf einem **interaktiven 3D-Globus**. Die Erde lässt sich drehen und zoomen; ein Klick auf die Oberfläche bestimmt die geografischen Koordinaten des Beobachtungsorts. Alternativ stehen Berlin, Augsburg, Kiew, Tokio und Sydney als Schnellauswahl zur Verfügung. In der Informationskarte können **Datum und Uhrzeit** für die anschließende Himmelsansicht festgelegt werden.
+
+Die Darstellung wechselt abhängig vom berechneten Sonnenstand zwischen Tages- und Nachtseite. Die Nachttextur zeigt Stadtlichter, während der Hintergrund die Ansicht räumlich ergänzt.
+
+### 02 · Sternkarte – Den Himmel über dem gewählten Ort erkunden
+
+![ASTRA – berechnete Sternkarte mit Sternbildlinien und rechter Sternbildauswahl](docs/screenshots/02-sternenhimmel.webp)
+
+Nach dem Wechsel in die Himmelsansicht erscheint eine **interaktive Sternkarte** für den zuvor gewählten Ort und Zeitpunkt. Sterne, markante Sternnamen und Verbindungslinien der Sternbilder werden anhand astronomischer Daten dargestellt. Mit der Maus lässt sich die Ansicht drehen und zoomen; die Bedienleiste erlaubt es, die Beobachtungszeit in **Stundenschritten** zu verändern sowie Sternnamen und Sternbildlinien ein- oder auszublenden.
+
+Rechts werden **mythologisch illustrierte Sternbilder** aufgeführt, von denen aktuell zumindest ein Teil rechnerisch über dem Horizont liegt. Ein Klick auf einen Eintrag öffnet dieselbe Detailansicht wie die Auswahl auf der Karte.
+
+### 03 · Sternbild – Astronomie und Mythologie verbinden
+
+![ASTRA – ausgewähltes Sternbild Orion mit Illustration und mythologischer Kurzgeschichte](docs/screenshots/03-sternbild-und-mythologie.webp)
+
+Bei der Auswahl wird das Sternbild **zentriert und näher herangeholt**. Die Informationskarte zeigt seinen Namen, eine Illustration, eine kurze astronomische Beschreibung, eine **mythologische Überlieferung**, das internationale Kürzel und die Zahl seiner dargestellten Verbindungslinien. Für die 25 illustrierten Sternbilder sind eigene Geschichten hinterlegt; die grundlegenden Beschreibungen umfassen alle **88 offiziellen Sternbilder**.
+
+Damit auch Sternbilder am Rand der üblichen Himmelsansicht vollständig betrachtet werden können, ergänzt die **Atlasansicht** bei Bedarf Sterne unterhalb des lokalen Horizonts. Beim Schließen der Karte kehrt die Darstellung zum normalen Überblick zurück.
 
 ## Technik
 
