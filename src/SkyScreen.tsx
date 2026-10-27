@@ -84,6 +84,14 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
   const infoCardRef = useRef<HTMLElement>(null)
   const hitRef = useRef<{ stars: ScreenPoint[]; lines: ScreenLine[] }>({ stars: [], lines: [] })
   const dragRef = useRef<{ x: number; rotation: number } | null>(null)
+  const touchesRef = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const pinchRef = useRef<{
+    distance: number
+    zoom: number
+    focus: SkyFocus
+    anchor: SkyFocus
+  } | null>(null)
+  const hadPinchRef = useRef(false)
   const currentFocusRef = useRef<SkyFocus>({ x: 0, y: 0 })
   const atlasRevealRef = useRef(0) // Fade in real stars below the horizon while exploring
   const [focus, setFocus] = useState<SkyFocus | null>(null)
@@ -370,14 +378,97 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
     return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
 
+  const pinchPoints = () => [...touchesRef.current.values()].slice(0, 2)
+
+  const pinchGeometry = (canvas: HTMLCanvasElement) => {
+    const [a, b] = pinchPoints()
+    const rect = canvas.getBoundingClientRect()
+    const radius = Math.min(rect.width, rect.height) * .54
+    return {
+      distance: Math.hypot(a.x - b.x, a.y - b.y),
+      anchor: {
+        x: ((a.x + b.x) / 2 - rect.left - rect.width / 2) / radius,
+        y: ((a.y + b.y) / 2 - rect.top - rect.height / 2) / radius,
+      },
+    }
+  }
+
+  const startPinch = (canvas: HTMLCanvasElement) => {
+    if (touchesRef.current.size < 2) return
+    const { distance, anchor } = pinchGeometry(canvas)
+    pinchRef.current = {
+      distance: Math.max(1, distance),
+      zoom,
+      focus: { ...currentFocusRef.current },
+      anchor,
+    }
+    hadPinchRef.current = true
+    dragRef.current = null
+    setHovered(null)
+  }
+
+  const movePinch = (canvas: HTMLCanvasElement) => {
+    const initial = pinchRef.current
+    if (!initial || touchesRef.current.size < 2) return
+    const { distance, anchor } = pinchGeometry(canvas)
+    const nextZoom = Math.max(1, Math.min(5, initial.zoom * distance / initial.distance))
+
+    // Keep the point beneath the two-finger midpoint fixed while zooming.
+    let fx = initial.focus.x + initial.anchor.x / initial.zoom - anchor.x / nextZoom
+    let fy = initial.focus.y + initial.anchor.y / initial.zoom - anchor.y / nextZoom
+    const maxOffset = selected ? 1.75 : 1 - 1 / nextZoom
+    const offset = Math.hypot(fx, fy)
+    if (offset > maxOffset && offset > 0) {
+      fx *= maxOffset / offset
+      fy *= maxOffset / offset
+    }
+    const angle = rotation * Math.PI / 180
+    currentFocusRef.current = { x: fx, y: fy }
+    setFocus({
+      x: fx * Math.cos(angle) + fy * Math.sin(angle),
+      y: -fx * Math.sin(angle) + fy * Math.cos(angle),
+    })
+    setZoom(nextZoom)
+  }
+
   return <main className="sky-screen">
     <canvas ref={canvasRef}
-      onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); dragRef.current = { x: e.clientX, rotation } }}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId)
+        if (e.pointerType === 'touch') {
+          if (touchesRef.current.size === 0) hadPinchRef.current = false
+          touchesRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+          if (touchesRef.current.size === 2) {
+            startPinch(e.currentTarget)
+            return
+          }
+          if (touchesRef.current.size > 2) return
+        }
+        dragRef.current = { x: e.clientX, rotation }
+      }}
       onPointerMove={(e) => {
+        if (e.pointerType === 'touch') {
+          if (!touchesRef.current.has(e.pointerId)) return
+          touchesRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+          if (touchesRef.current.size >= 2) {
+            movePinch(e.currentTarget)
+            return
+          }
+          if (hadPinchRef.current) return
+        }
         if (dragRef.current) setRotation(dragRef.current.rotation + (e.clientX - dragRef.current.x) * .25)
-        else { const p = pointer(e); setHovered(hitTest(p.x, p.y)) }
+        else if (e.pointerType !== 'touch') { const p = pointer(e); setHovered(hitTest(p.x, p.y)) }
       }}
       onPointerUp={(e) => {
+        if (e.pointerType === 'touch') {
+          const wasPinch = hadPinchRef.current
+          touchesRef.current.delete(e.pointerId)
+          if (touchesRef.current.size < 2) pinchRef.current = null
+          if (wasPinch) {
+            dragRef.current = null
+            return // Releasing either finger must not select or reset the sky.
+          }
+        }
         const wasDrag = dragRef.current && Math.abs(e.clientX - dragRef.current.x) > 4
         dragRef.current = null
         if (wasDrag) return
@@ -388,7 +479,14 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
         else if (hit?.kind === 'star') { setSidebarOpen(false); focusOnStar(hit.star) }
         else { setFocus(null); setZoom(1); setSidebarOpen(true) }
       }}
-      onPointerLeave={() => { dragRef.current = null; setHovered(null) }}
+      onPointerCancel={(e) => {
+        touchesRef.current.delete(e.pointerId)
+        if (touchesRef.current.size < 2) pinchRef.current = null
+        dragRef.current = null
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== 'touch') { dragRef.current = null; setHovered(null) }
+      }}
       onWheel={(e) => {
         e.preventDefault()
         // The sky chart fills its circular frame at 1x. Going below 1x
