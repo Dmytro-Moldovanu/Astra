@@ -251,11 +251,7 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
         places.forEach((position, index) => {
           if (position.altitude < 0 && atlasOpacity < .01) return
           const p = project(position.azimuth, position.altitude)
-          const part = language === 'uk'
-            ? (index === 0 ? 'голова' : 'хвіст')
-            : language === 'en'
-              ? (index === 0 ? 'head' : 'tail')
-              : (index === 0 ? 'Kopf' : 'Schwanz')
+          const part = index === 0 ? t.serpensHead : t.serpensTail
           const label = places.length === 2 ? `${nameOf(constellation)} · ${part}` : nameOf(constellation)
           ctx.globalAlpha = position.altitude < 0 ? atlasOpacity * .8 : 1
           ctx.textAlign = 'center'; ctx.fillStyle = isActive ? '#c9baff' : '#9ddaff'; ctx.font = '600 13px Inter, sans-serif'
