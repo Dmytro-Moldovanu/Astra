@@ -1,8 +1,8 @@
-/** Western constellation illustrations by Johan Meuris, distributed by Stellarium.
- * Free Art License 1.3 (Licence Art Libre): https://artlibre.org/licence/lal/en/
- * Source: https://github.com/Stellarium/stellarium-skycultures/tree/master/western
+/** Illustrationen: Johan Meuris / Stellarium, Free Art License 1.3.
+ * https://github.com/Stellarium/stellarium-skycultures/tree/master/western
+ * https://artlibre.org/licence/lal/en/
  */
-export const mythicFigures: Record<string,{caption:string}> = {
+export const mythicFigures: Record<string, { caption: string }> = {
   "And": {
     "caption": "Die gefesselte Prinzessin"
   },
@@ -79,9 +79,19 @@ export const mythicFigures: Record<string,{caption:string}> = {
     "caption": "Das Seeungeheuer"
   }
 }
-export const illustratedConstellationIds=Object.keys(mythicFigures)
-export function MythicSketch({id,large=false}:{id:string;large?:boolean}){
- const figure=mythicFigures[id]
- if(!figure) return null
- return <img className={large?'mythic-engraving large':'mythic-engraving'} src={`./constellation-art/${id}.webp`} alt={figure.caption} loading="lazy"/>
+
+export const illustratedConstellationIds = Object.keys(mythicFigures)
+
+export function MythicSketch({ id, large = false }: { id: string; large?: boolean }) {
+  const figure = mythicFigures[id]
+  if (!figure) return null
+  return (
+    <img
+      className={large ? 'mythic-engraving large' : 'mythic-engraving'}
+      src={`./constellation-art/${id}.webp`}
+      alt={figure.caption}
+      loading="lazy"
+      decoding="async"
+    />
+  )
 }

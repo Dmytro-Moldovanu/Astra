@@ -1,4 +1,4 @@
-import { Equator, Horizon, Observer, SiderealTime } from 'astronomy-engine'
+import { Body, Equator, Horizon, Observer, SiderealTime } from 'astronomy-engine'
 
 export type HorizontalPoint = { azimuth: number; altitude: number }
 
@@ -43,7 +43,7 @@ export function formatLocal(date: Date, timeZone: string) {
 
 /** Geographic position of the Sun directly overhead at a given UTC instant. */
 export function subsolarPoint(date: Date): { lat: number; lng: number } {
-  const sun = Equator('Sun', date, new Observer(0, 0, 0), true, true)
+  const sun = Equator(Body.Sun, date, new Observer(0, 0, 0), true, true)
   const longitude = ((sun.ra - SiderealTime(date)) * 15 + 540) % 360 - 180
   return { lat: sun.dec, lng: longitude }
 }
