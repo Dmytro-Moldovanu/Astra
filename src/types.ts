@@ -20,6 +20,7 @@ export type Constellation = {
   latin: string
   center: [number, number]
   lines: [number, number][][]
+  partCenters?: [number, number][]
 }
 
 export type Selection =

@@ -28,16 +28,41 @@ async function loadCatalog(): Promise<CatalogData> {
     id: Number(f.id), ra: f.geometry.coordinates[0], dec: f.geometry.coordinates[1],
     mag: Number(f.properties.mag), bv: Number(f.properties.bv ?? 0), name: namesRaw[String(f.id)]?.name || undefined,
   }))
-  const meta = new Map<string, any>(constellationsRaw.features.map((f: any) => [String(f.id), f]))
-  const constellations: Constellation[] = linesRaw.features.map((f: any) => {
-    const info: any = meta.get(String(f.id))
-    return {
-      id: String(f.id), name: info?.properties?.de || info?.properties?.name || String(f.id),
-      latin: info?.properties?.la || info?.properties?.name || String(f.id),
-      center: info?.geometry?.coordinates ?? [0, 0], lines: f.geometry.coordinates,
+  // Serpens (head and tail) has two entries in the catalogue but one IAU ID.
+  const metadata = new Map<string, any[]>()
+  for (const info of constellationsRaw.features) {
+    const id = String(info.id)
+    const entries = metadata.get(id) ?? []
+    entries.push(info)
+    metadata.set(id, entries)
+  }
+  const merged = new Map<string, Constellation>()
+  for (const feature of linesRaw.features) {
+    const id = String(feature.id)
+    const previous = merged.get(id)
+    if (previous) {
+      previous.lines.push(...feature.geometry.coordinates)
+      continue
     }
-  })
-  return { stars, constellations }
+    const infos = metadata.get(id) ?? []
+    const info = infos[0]
+    const centres: [number, number][] = infos
+      .map((item: any) => item.geometry?.coordinates)
+      .filter((value: unknown): value is [number, number] => Array.isArray(value) && value.length === 2)
+    const center: [number, number] = centres.length > 1
+      ? [
+          centres.reduce((sum, point) => sum + point[0], 0) / centres.length,
+          centres.reduce((sum, point) => sum + point[1], 0) / centres.length,
+        ]
+      : centres[0] ?? [0, 0]
+    merged.set(id, {
+      id, name: info?.properties?.de || info?.properties?.name || id,
+      latin: info?.properties?.la || info?.properties?.name || id,
+      center, partCenters: centres.length > 1 ? centres : undefined,
+      lines: [...feature.geometry.coordinates],
+    })
+  }
+  return { stars, constellations: [...merged.values()] }
 }
 
 function distanceToSegment(px: number, py: number, line: ScreenLine) {
@@ -83,6 +108,7 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
       constellation,
       lines: constellation.lines.map((line) => line.map(([ra, dec]) => toHorizontal(ra, dec, date, location.lat, location.lng))),
       center: toHorizontal(constellation.center[0], constellation.center[1], date, location.lat, location.lng),
+      partCenters: constellation.partCenters?.map(([ra, dec]) => toHorizontal(ra, dec, date, location.lat, location.lng)),
     }))
     return { starPoints, linePoints }
   }, [catalog, date, location.lat, location.lng])
@@ -216,17 +242,26 @@ export default function SkyScreen({ language, location, date, onDate, onBack }: 
         }
         ctx.globalAlpha = 1
       })
-      if (showLines) horizontal.linePoints.forEach(({ constellation, center }) => {
-        if (center.altitude < 0 && atlasOpacity < .01) return
+      if (showLines) horizontal.linePoints.forEach(({ constellation, center, partCenters }) => {
         const isHover = hovered?.kind === 'constellation' && hovered.constellation.id === constellation.id
         const isActive = selected?.kind === 'constellation' && selected.constellation.id === constellation.id
-        if (isHover || isActive) {
-          const p = project(center.azimuth, center.altitude)
-          ctx.globalAlpha = center.altitude < 0 ? atlasOpacity * .8 : 1
+        if (!isHover && !isActive) return
+        // Serpens is split by Ophiuchus; label its head and tail separately.
+        const places = constellation.id === 'Ser' && partCenters?.length === 2 ? partCenters : [center]
+        places.forEach((position, index) => {
+          if (position.altitude < 0 && atlasOpacity < .01) return
+          const p = project(position.azimuth, position.altitude)
+          const part = language === 'uk'
+            ? (index === 0 ? 'голова' : 'хвіст')
+            : language === 'en'
+              ? (index === 0 ? 'head' : 'tail')
+              : (index === 0 ? 'Kopf' : 'Schwanz')
+          const label = places.length === 2 ? `${nameOf(constellation)} · ${part}` : nameOf(constellation)
+          ctx.globalAlpha = position.altitude < 0 ? atlasOpacity * .8 : 1
           ctx.textAlign = 'center'; ctx.fillStyle = isActive ? '#c9baff' : '#9ddaff'; ctx.font = '600 13px Inter, sans-serif'
-          ctx.fillText(nameOf(constellation), p.x, p.y); ctx.textAlign = 'left'
-          ctx.globalAlpha = 1
-        }
+          ctx.fillText(label, p.x, p.y)
+          ctx.textAlign = 'left'; ctx.globalAlpha = 1
+        })
       })
       ctx.fillStyle = 'rgba(210,230,255,.55)'; ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center'
       ctx.globalAlpha = 1 - atlasOpacity
