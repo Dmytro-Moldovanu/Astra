@@ -9,7 +9,13 @@ button { color: inherit; }
 
 .earth-screen { --bg-x: 0px; --bg-y: 0px; position: relative; width: 100%; height: 100%; overflow: hidden; background: #02040c; }
 
-.earth-background { position: absolute; inset: -2%; z-index: 0; background-image: url('/earth-background.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; transform: translate3d(var(--bg-x), var(--bg-y), 0); transform-origin: center; pointer-events: none; }
+/* Home page only: real 4K Hubble N44 photograph, no artificial star overlays.
+   Photograph: ESA/Hubble & NASA, D. Gouliermis (CC BY 4.0).
+   External ESA CDN avoids re-compression; see docs/QUELLEN_UND_LIZENZEN.md. */
+.earth-background { position: absolute; inset: -4%; z-index: 0; background-color: #030713; background-image: linear-gradient(90deg, rgba(2,5,17,.58), rgba(2,5,17,.42) 32%, rgba(2,5,17,.44) 68%, rgba(2,5,17,.61)), linear-gradient(180deg, rgba(3,6,18,.46), rgba(3,6,18,.13) 45%, rgba(3,6,18,.48)), url('https://cdn.esahubble.org/archives/images/wallpaper_uhd/potm2608a.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; transform: translate3d(var(--bg-x), var(--bg-y), 0); transform-origin: center; filter: saturate(.75) brightness(.84); pointer-events: none; }
+.earth-image-credit { position: absolute; z-index: 11; right: 18px; bottom: 14px; font-size: 9px; font-weight: 400; letter-spacing: .01em; color: rgba(192,210,232,.73); text-decoration: none; text-shadow: 0 1px 4px #030713; }
+.earth-image-credit:hover, .earth-image-credit:focus-visible { color: #f5fbff; text-decoration: underline; }
+@media (max-width: 700px) { .earth-image-credit { right: auto; left: 20px; top: 48px; bottom: auto; font-size: 8px; } }
 .brand, .sky-brand { position: absolute; z-index: 10; left: 42px; top: 30px; letter-spacing: .28em; font-size: 14px; font-weight: 600; }
 .brand-mark, .sky-brand > span { color: #78c8ff; font-size: 19px; margin-right: 8px; text-shadow: 0 0 16px #78c8ff; }
 .hero-copy { position: absolute; z-index: 8; top: 82px; width: 100%; text-align: center; pointer-events: none; }
