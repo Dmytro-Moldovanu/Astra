@@ -53,38 +53,6 @@ Die Darstellung läuft im Browser. Es ist kein Benutzerkonto und kein eigener Ba
 
 Die Sternkarte basiert auf horizontalen Koordinaten (Azimut und Höhe) für den jeweiligen Beobachtungsort. Die grafische Darstellung ist eine **didaktische Himmelskarte** und keine fotografische Aufnahme oder vollwertige Planetariumsprojektion. Die figurativen Stellarium-Illustrationen werden in Informationskarten angezeigt; sie sind nicht deckungsgleich mit allen gezeichneten Sternbildlinien.
 
-## Lokal starten
-
-**Voraussetzung:** Node.js 20.19+ oder Node.js 22+ und npm.
-
-```bash
-npm ci
-npm run dev
-```
-
-Die verwendeten Erdtexturen und die 25 Sternbildillustrationen sind bereits im GitHub-Projekt unter `public/` gespeichert. Für den lokalen Start ist kein gesonderter Bilddownload erforderlich.
-
-Die im Terminal angezeigte lokale Adresse öffnen (in der Regel `http://localhost:5173/`).
-
-**GitHub Codespaces:**
-
-```bash
-npm run dev -- --host 0.0.0.0 --port 5173 --strictPort
-```
-
-Anschließend in **Ports** den Port **5173** in der Vorschau öffnen. Bei Bedarf den Port auf **Private** stellen.
-
-Für eine Produktionsversion:
-
-```bash
-npm run build
-npm run preview
-```
-
-Die Kataloge und Bilddateien können mit `npm run check:content` geprüft werden.
-
-Der generierte Ordner `dist/` ist ein Build-Artefakt und wird nicht im Quellcode archiviert.
-
 ## Projektstruktur
 
 ```text
